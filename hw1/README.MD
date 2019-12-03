@@ -1,6 +1,6 @@
 # Local NTP time
 
-##Usage
+## Usage
 `$ go get github.com/lenniDespero/otus-golang/hw1`
 
     package main

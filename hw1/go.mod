@@ -1,4 +1,4 @@
-module github.com/lenniDespero/otus-golang/hw1
+module hw1
 
 require (
 	github.com/beevik/ntp v0.2.0

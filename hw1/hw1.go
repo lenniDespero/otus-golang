@@ -2,8 +2,9 @@ package hw1
 
 import (
 	"fmt"
-	"github.com/beevik/ntp"
 	"os"
+
+	"github.com/beevik/ntp"
 )
 
 const server = "0.pool.ntp.org"

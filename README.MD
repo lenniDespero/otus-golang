@@ -1,6 +1,6 @@
 # OTUS-golang 10.2019
 
-[TOC]
+* [hw-1](#hw-1)
 
 ## hw-1
 Hello now()  

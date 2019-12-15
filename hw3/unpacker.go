@@ -1,4 +1,4 @@
-package main
+package hw3
 
 import (
 	"errors"
@@ -43,15 +43,3 @@ func isNumber(s string) bool {
 	return true
 }
 
-func main() {
-	baseStrings := []string{`a4bc2d5e`, `abcd`, `45`, `qwe\4\5`, `qwe\45`, `qwe\\5`, `qwe\42`}
-	for _, string := range baseStrings {
-		result, err := Unpack(string)
-		if err != nil {
-			fmt.Printf("%s => %s (❌  not unpacked) : %s\n", string, result, err)
-		} else {
-			fmt.Printf("%s => %s (✅  unpacked)\n", string, result)
-		}
-
-	}
-}

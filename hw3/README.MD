@@ -1,8 +1,24 @@
 # String unpacker
 
 ## Usage
-clone or download sthis sources
-run `$ go run unpacker.go`
+`$ go get github.com/lenniDespero/otus-golang/hw3`
+
+    package main
+
+	import "github.com/lenniDespero/otus-golang/hw3"
+
+	func main() {
+		baseStrings := []string{`a4bc2d5e`, `abcd`, `45`, `qwe\4\5`, `qwe\45`, `qwe\\5`, `qwe\42`}
+        	for _, string := range baseStrings {
+        		result, err := hw3.Unpack(string)
+        		if err != nil {
+        			fmt.Printf("%s => %s (❌  not unpacked) : %s\n", string, result, err)
+        		} else {
+        			fmt.Printf("%s => %s (✅  unpacked)\n", string, result)
+        		}
+        
+        	}
+	}
 
 Output will be like: 
 

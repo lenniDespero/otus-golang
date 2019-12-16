@@ -1,4 +1,4 @@
-# String unpacker
+# String slicer
 
 ## Usage
 `$ go get github.com/lenniDespero/otus-golang/hw4`

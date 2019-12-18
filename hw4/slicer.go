@@ -4,61 +4,58 @@ import (
 	"bufio"
 	"io"
 	"os"
-	"regexp"
 	"sort"
 	"strings"
 )
 
-var words = make(map[string]int)
-
 // Slicer return slice of to most used words in file or string
 func Slicer(s string, count int) ([]string, error) {
+	var words = make(map[string]int)
 	_, err := os.Stat(s)
 	if err != nil {
-		processString(s)
+		words = processString(s, words)
 	} else {
-		_, err := processFile(s)
+		words, err = processFile(s, words)
 		if err != nil {
 			return []string{}, err
 		}
 	}
-	return sortWords(count), nil
+	return sortWords(count, words), nil
 }
 
 // processString clear string and add words to map
-func processString(s string) {
+func processString(s string, words map[string]int) map[string]int {
 	clearString := clearText(s)
-	calculateWordsFromString(clearString)
+	return calculateWordsFromString(clearString, words)
 }
 
 // clearText remove symbols and whitespaces
 func clearText(s string) string {
-	reg := regexp.MustCompile(`\.|,|'|:|\\|/|"|(\s—)|(\s-)|\d`)
-	s = reg.ReplaceAllString(s, "")
-	reg = regexp.MustCompile(`\s+`)
-	s = reg.ReplaceAllString(s, " ")
+	for _, splitChar := range []string{",", " -", "—", ":", "'", ".", "!", "?", "/", "\\", "|"} {
+		s = strings.Replace(s, splitChar, " ", -1)
+	}
 	return strings.ToLower(s)
 }
 
 // calculateWordsFromString add every word from string to map
-func calculateWordsFromString(s string) {
-	temp := strings.Split(s, " ")
+func calculateWordsFromString(s string, words map[string]int) map[string]int {
+	temp := strings.Fields(s)
 	for _, val := range temp {
 		if len(val) > 0 {
 			words[val]++
 		}
 	}
+	return words
 }
 
 // sortWords sort words from map by their counts and return slice
-func sortWords(count int) []string {
+func sortWords(count int, words map[string]int) []string {
 	type keyValue struct {
 		Key   string
 		Value int
 	}
-
-	var sortedStruct []keyValue
-
+	wordsLen := len(words)
+	var sortedStruct = make([]keyValue, 0, wordsLen)
 	for key, value := range words {
 		sortedStruct = append(sortedStruct, keyValue{key, value})
 	}
@@ -66,18 +63,19 @@ func sortWords(count int) []string {
 	sort.Slice(sortedStruct, func(i, j int) bool {
 		return sortedStruct[i].Value > sortedStruct[j].Value
 	})
-	var result []string
-	for _, keyValue := range sortedStruct[0:count] {
-		result = append(result, keyValue.Key)
+	var result = make([]string, 0, count)
+	for i := 0; (i < count) && (i < wordsLen); i++ {
+		result = append(result, sortedStruct[i].Key)
 	}
+
 	return result
 }
 
 // processFile will process every string from file
-func processFile(s string) (bool, error) {
+func processFile(s string, words map[string]int) (map[string]int, error) {
 	file, err := os.Open(s)
 	if err != nil {
-		return false, err
+		return map[string]int{}, err
 	}
 	reader := bufio.NewReader(file)
 	defer file.Close()
@@ -89,10 +87,10 @@ func processFile(s string) (bool, error) {
 			if err == io.EOF {
 				break
 			} else {
-				return false, err
+				return map[string]int{}, err
 			}
 		}
-		processString(line)
+		words = processString(line, words)
 	}
-	return true, nil
+	return words, nil
 }

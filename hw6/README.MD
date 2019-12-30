@@ -1,7 +1,7 @@
 # String slicer
 
 ## Usage
-`$ go get github.com/lenniDespero/otus-golang/hw5`
+`$ go get github.com/lenniDespero/otus-golang/hw6`
 
     package main
 

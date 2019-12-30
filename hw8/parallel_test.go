@@ -85,7 +85,7 @@ func TestRunWithErrors(t *testing.T) {
 	if len(err) != 1 {
 		t.Errorf("Expected %d errors, got %d", 1, len(err))
 	}
-	if counter >= workersCount+maxErrors {
+	if counter > workersCount+maxErrors {
 		t.Errorf("Expected %d tasks, got %d", workersCount+maxErrors, counter)
 	}
 }

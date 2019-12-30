@@ -95,6 +95,19 @@ func TestList_Remove2(t *testing.T) {
 	}
 }
 
+func TestList_Double_Remove(t *testing.T) {
+	list := prepareList()
+	testData := "some data"
+	removed := list.PushBack(testData)
+	testDataNext := "some data next"
+	list.PushBack(testDataNext)
+	list.Remove(removed)
+	list.Remove(removed)
+	if list.Len() != 5 {
+		t.Errorf("Expected %d, got %d", 5, list.Len())
+	}
+}
+
 func TestList_Remove_First(t *testing.T) {
 	list := prepareList()
 	first := list.First()

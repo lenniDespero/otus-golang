@@ -44,13 +44,12 @@ func (n *Item) Prev() *Item {
 
 // Add item as first
 func (l *List) PushFront(v interface{}) *Item {
-	//item := Item{next, l.first, data: v, list: l}
-	item := Item{data: v, list: l}
+	item := Item{next: l.first, data: v, list: l}
 	if l.last == nil {
 		l.last = &item
 	}
 	if l.first != nil {
-		item.next, l.first.prev = l.first, &item
+		l.first.prev = &item
 	}
 	l.first = &item
 	l.length++
@@ -59,9 +58,9 @@ func (l *List) PushFront(v interface{}) *Item {
 
 // adds item as last
 func (l *List) PushBack(v interface{}) *Item {
-	item := Item{data: v, list: l}
+	item := Item{prev: l.last, data: v, list: l}
 	if l.last != nil {
-		item.prev, l.last.next = l.last, &item
+		l.last.next = &item
 	}
 	if l.first == nil {
 		l.first = &item
@@ -89,6 +88,7 @@ func (l *List) Remove(i *Item) {
 func (l *List) removeFromMiddle(i *Item) {
 	if i.prev.next == i && i.next.prev == i {
 		i.prev.next, i.next.prev = i.next, i.prev
+		i.list = nil
 		l.length--
 	}
 }
@@ -96,6 +96,7 @@ func (l *List) removeFromMiddle(i *Item) {
 func (l *List) removeFromFront(i *Item) {
 	if i.next.prev == i {
 		i.next.prev, l.first = nil, i.next
+		i.list = nil
 		l.length--
 	}
 }
@@ -103,6 +104,7 @@ func (l *List) removeFromFront(i *Item) {
 func (l *List) removeFromBack(i *Item) {
 	if i.prev.next == i {
 		i.prev.next, l.last = nil, i.prev
+		i.list = nil
 		l.length--
 	}
 }
@@ -110,6 +112,7 @@ func (l *List) removeFromBack(i *Item) {
 func (l *List) removeLast(i *Item) {
 	if l.first == i && l.last == i {
 		l.first, l.last = nil, nil
+		i.list = nil
 		l.length--
 	}
 }

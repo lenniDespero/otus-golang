@@ -118,6 +118,25 @@ func TestList_Remove_First(t *testing.T) {
 	}
 }
 
+func TestList_Remove_All(t *testing.T) {
+	list := prepareList()
+	length := list.Len()
+	for i := 0; i < length; i++ {
+		item := list.First()
+		list.Remove(item)
+	}
+
+	if list.Len() != 0 {
+		t.Errorf("Not expected %d length", list.Len())
+	}
+	if list.First() != nil {
+		t.Errorf("Not expected %v as first item", list.First())
+	}
+	if list.Last() != nil {
+		t.Errorf("Not expected %v as last item", list.Last())
+	}
+}
+
 func TestItem_Value(t *testing.T) {
 	testData := "some data"
 	item := Item{data: testData}

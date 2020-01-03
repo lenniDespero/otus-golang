@@ -12,37 +12,37 @@ type Item struct {
 	list *List
 }
 
-// Returns List Length
+// Len returns number of List elements
 func (l *List) Len() int {
 	return l.length
 }
 
-// Returns first item from list
+// First returns the first Item from List
 func (l *List) First() *Item {
 	return l.first
 }
 
-// Returns last item from list
+// Last returns the last Item from List
 func (l *List) Last() *Item {
 	return l.last
 }
 
-// Returns value
+// Value returns Item value
 func (n *Item) Value() interface{} {
 	return n.data
 }
 
-// Returns next item
+// Next returns next Item from List
 func (n *Item) Next() *Item {
 	return n.next
 }
 
-// Returns prev list
+// Prev returns previous Item from List
 func (n *Item) Prev() *Item {
 	return n.prev
 }
 
-// Add item as first
+// PushFront add Item as first in List
 func (l *List) PushFront(v interface{}) *Item {
 	item := Item{next: l.first, data: v, list: l}
 	if l.last == nil {
@@ -56,7 +56,7 @@ func (l *List) PushFront(v interface{}) *Item {
 	return &item
 }
 
-// adds item as last
+// PushBack add Item as last of List
 func (l *List) PushBack(v interface{}) *Item {
 	item := Item{prev: l.last, data: v, list: l}
 	if l.last != nil {
@@ -71,6 +71,7 @@ func (l *List) PushBack(v interface{}) *Item {
 	return &item
 }
 
+// Remove will remove Item from List.
 func (l *List) Remove(i *Item) {
 	if i.list == l {
 		if i.prev != nil && i.next != nil {

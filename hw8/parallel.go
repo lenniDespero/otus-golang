@@ -3,7 +3,7 @@ package hw8
 //WorkerFunction keep functions to workers
 type WorkerFunction func() error
 
-//Run slice of functions on N workers while get M errors
+// Run will run slice of functions on workersCount workers while get maxErrors errors
 func Run(functions []WorkerFunction, workersCount int, maxErrors int) ([]error, int) {
 	tasksChan := make(chan WorkerFunction)
 	resultsChan := make(chan error, workersCount-1)

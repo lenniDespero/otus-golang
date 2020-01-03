@@ -9,6 +9,7 @@ import (
 
 const server = "0.pool.ntp.org"
 
+// CurrentTime returns current time or error from ntp server
 func CurrentTime() {
 	time, err := ntp.Time(server)
 	if err != nil {

@@ -8,6 +8,7 @@ import (
 	"unicode"
 )
 
+// Unpack will return unpacked string or error from packed string
 func Unpack(s string) (string, error) {
 	var unpack strings.Builder
 	var flagEscape bool
@@ -38,4 +39,3 @@ func Unpack(s string) (string, error) {
 	}
 	return unpack.String(), nil
 }
-

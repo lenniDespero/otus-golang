@@ -6,9 +6,11 @@
     package main
 
 	import (
-    	"fmt"
-    
-    	"github.com/lenniDespero/otus-golang/hw8"
+	    "flag"
+	    "fmt"
+	    "os"
+
+	    "github.com/lenniDespero/otus-golang/hw10"
     )
 
 	func main() {

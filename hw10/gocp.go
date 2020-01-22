@@ -1,10 +1,29 @@
-package hw10
+package main
 
 import (
+	"flag"
 	"fmt"
 	"io"
 	"os"
 )
+
+func main() {
+	from := flag.String("from", "", "limit bytes to write")
+	to := flag.String("to", "", "offset bytes to write")
+	limit := flag.Int64("limit", -1, "limit bytes to write")
+	offset := flag.Int64("offset", 0, "offset bytes to write")
+	flag.Parse()
+	if *from == "" || *to == "" {
+		fmt.Println("Nothing to copy. Use -h to help.")
+		os.Exit(1)
+	}
+	err := Copy(*from, *to, *limit, *offset)
+	if err != nil {
+		fmt.Printf("An error occurred while file copying: %s\n", err.Error())
+		os.Exit(1)
+	}
+	fmt.Println("File copied successfully")
+}
 
 //Copy will copy From (string) file destination To (string) file destination Limit (int) bytes with Offset (int) bytes
 func Copy(from string, to string, limit int64, offset int64) error {
@@ -33,7 +52,11 @@ func Copy(from string, to string, limit int64, offset int64) error {
 			return fmt.Errorf("Can't set offset for reading")
 		}
 		if offset+total >= info.Size() {
-			total = offset + total - info.Size()
+			if total == info.Size() {
+				total = info.Size() - offset
+			} else {
+				total = offset + total - info.Size()
+			}
 		}
 	}
 

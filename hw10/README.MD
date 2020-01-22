@@ -1,35 +1,12 @@
 # String slicer
 
 ## Usage
-`$ go get github.com/lenniDespero/otus-golang/hw10`
-
-    package main
-
-	import (
-	    "flag"
-	    "fmt"
-	    "os"
-
-	    "github.com/lenniDespero/otus-golang/hw10"
-    )
-
-	func main() {
-			from := flag.String("from", "", "limit bytes to write")
-            to := flag.String("to", "", "offset bytes to write")
-            limit := flag.Int64("limit", -1, "limit bytes to write")
-            offset := flag.Int64("offset", 0, "offset bytes to write")
-            flag.Parse()
-            if *from == "" || *to == "" {
-            	fmt.Println("Nothing to copy. Use -h to help.")
-            	os.Exit(1)
-            }
-            err := hw10.Copy(*from, *to, *limit, *offset)
-            if err != nil {
-            	fmt.Printf("An error occurred while file copying: %s\n", err.Error())
-            	os.Exit(1)
-            }
-            fmt.Println("File copied successfully")
-	}
+Download sourse code and 
+`$ go gocp.go -from path -to path [-limit int] [-offset int]`  
+or build it and run like
+`$ go build -o gocp`
+`$ .\gocp -from path -to path [-limit int] [-offset int]`
+    
 
 Output will be like: 
 

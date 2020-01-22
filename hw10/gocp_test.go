@@ -1,4 +1,4 @@
-package hw10
+package main
 
 import (
 	"log"

@@ -90,11 +90,20 @@ func TestReadDirWrong(t *testing.T) {
 
 func ExampleRunCmd() {
 	env := map[string]string{"BIG_STRANGE_VAR": "test"}
-	cmd := []string{"env", "|", "grep", "BIG_STRANGE_VAR"}
+	cmd := []string{"./testscript"}
 	code := RunCmd(cmd, env)
 	if code != 0 {
 		log.Fatalf("Except Exit code - 0, get - %d", code)
 	}
 	// Output:
-	// BIG_STRANGE_VAR=test
+	// test
+}
+
+func TestRunCmd(t *testing.T) {
+	env := map[string]string{"BIG_STRANGE_AnotherVAR": "test"}
+	cmd := []string{"./testscript"}
+	code := RunCmd(cmd, env)
+	if code != 1 {
+		t.Errorf("Exceptec exit code 1, got %d", code)
+	}
 }

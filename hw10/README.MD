@@ -1,4 +1,4 @@
-# String slicer
+# GOCP
 
 ## Usage
 Download sourse code and 

@@ -30,15 +30,15 @@ func Copy(from string, to string, limit int64, offset int64) error {
 	file, err := os.Open(from)
 	if err != nil {
 
-		return fmt.Errorf("No file or access denied: %s", err.Error())
+		return fmt.Errorf("no file or access denied: %s", err.Error())
 	}
 	defer file.Close()
 
 	info, err := file.Stat()
 	if err != nil {
-		return fmt.Errorf("Can't read file information: %s", err.Error())
+		return fmt.Errorf("can't read file information: %s", err.Error())
 	}
-	var total int64 = info.Size()
+	total := info.Size()
 
 	var input io.Reader = file
 	if limit != -1 {
@@ -49,7 +49,7 @@ func Copy(from string, to string, limit int64, offset int64) error {
 	if offset > 0 {
 		pos, err := file.Seek(offset, 0)
 		if err != nil || pos != offset {
-			return fmt.Errorf("Can't set offset for reading")
+			return fmt.Errorf("can't set offset for reading")
 		}
 		if offset+total >= info.Size() {
 			if total == info.Size() {
@@ -62,7 +62,7 @@ func Copy(from string, to string, limit int64, offset int64) error {
 
 	output, err := os.Create(to)
 	if err != nil {
-		return fmt.Errorf("Can't create file: %s", err.Error())
+		return fmt.Errorf("can't create file: %s", err.Error())
 	}
 	defer output.Close()
 	defer println()
@@ -74,7 +74,7 @@ func Copy(from string, to string, limit int64, offset int64) error {
 				printBar(totalWritten, totalWritten)
 				break
 			}
-			return fmt.Errorf("Error: %s", err.Error())
+			return fmt.Errorf("error: %s", err.Error())
 		}
 		printBar(totalWritten, total)
 	}

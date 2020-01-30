@@ -81,6 +81,27 @@ func TestReadDirEmptyFile(t *testing.T) {
 }
 
 func TestReadDirWrong(t *testing.T) {
+	dir, err := ioutil.TempDir("", "test-")
+	if err != nil {
+		t.Fatalf("Fail to create dir: %s", err)
+	}
+	defer func() {
+		_ = os.RemoveAll(dir)
+	}()
+	_, err = ioutil.TempDir(dir, "test-")
+	if err != nil {
+		t.Fatalf("Fail to create dir: %s", err)
+	}
+	env, err := ReadDir(dir)
+	if err != nil {
+		t.Fatalf("Fail to read dir: %s", err)
+	}
+	if len(env) > 0 {
+		t.Errorf("Wait %d envs, get %d", 0, len(env))
+	}
+}
+
+func TestReadDirWithDir(t *testing.T) {
 
 	_, err := ReadDir("SomeSrangeNotExistDir")
 	if err == nil {

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -11,8 +10,7 @@ import (
 func main() {
 	args := os.Args[1:]
 	if len(args) < 2 {
-		fmt.Println("To low args")
-		return
+		log.Fatalln("Too few args")
 	}
 	env, err := ReadDir(args[0])
 	if err != nil {
@@ -53,6 +51,13 @@ func ReadDir(dir string) (map[string]string, error) {
 		return env, err
 	}
 	for _, file := range files {
+		stat, err := os.Stat(dir + "/" + file.Name())
+		if err != nil {
+			return env, err
+		}
+		if stat.IsDir() == true {
+			continue
+		}
 		content, err := ioutil.ReadFile(dir + "/" + file.Name())
 		if err != nil {
 			return env, err

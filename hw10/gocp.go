@@ -40,7 +40,7 @@ func Copy(from string, to string, limit int64, offset int64) error {
 	}
 	total := info.Size()
 
-	var input io.Reader = file
+	input := io.Reader(file)
 	if limit != -1 {
 		input = io.LimitReader(file, limit)
 		total = limit

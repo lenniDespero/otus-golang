@@ -1,11 +1,11 @@
-package storage
+package base
 
 import (
 	"github.com/lenniDespero/otus-golang/hw13/internal/event"
 )
 
-// Storage interface
-type Storage interface {
+// StorageInterface interface
+type StorageInterface interface {
 	// Add event to storage.
 	Add(event event.Event) error
 
@@ -18,6 +18,9 @@ type Storage interface {
 	// GetEvents return all events
 	GetEvents() ([]event.Event, error)
 
-	//GetEventsBy return events with params
-	GetEventsBy(property string, value string) ([]event.Event, error)
+	//GetEventByID return event with ID
+	GetEventByID(id int64) ([]event.Event, error)
+
+	//Delete will mark event as deleted
+	Delete(id int64) error
 }

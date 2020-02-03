@@ -12,10 +12,12 @@ type Storage struct {
 	events map[int64]event.Event
 }
 
+//New returns new storage
 func New() *Storage {
 	return &Storage{events: make(map[int64]event.Event)}
 }
 
+// Add event to storage.
 func (storage *Storage) Add(event event.Event) error {
 	for _, e := range storage.events {
 		if inTimeSpan(e.DateStarted, e.DateComplete, event.DateStarted) ||
@@ -29,6 +31,7 @@ func (storage *Storage) Add(event event.Event) error {
 	return nil
 }
 
+// Edit event data in data storage
 func (storage *Storage) Edit(id int64, event event.Event) error {
 	e, ok := storage.events[id]
 	if !ok {
@@ -43,6 +46,7 @@ func (storage *Storage) Edit(id int64, event event.Event) error {
 	return nil
 }
 
+// GetEvents return all events
 func (storage *Storage) GetEvents() ([]event.Event, error) {
 	if len(storage.events) > 0 {
 		events := make([]event.Event, 0, len(storage.events))
@@ -58,7 +62,7 @@ func (storage *Storage) GetEvents() ([]event.Event, error) {
 	return []event.Event{}, stor.ErrNotFound
 }
 
-//GetEventByID
+//GetEventByID return event with ID
 func (storage *Storage) GetEventByID(id int64) ([]event.Event, error) {
 	e, ok := storage.events[id]
 	if !ok {
@@ -69,6 +73,7 @@ func (storage *Storage) GetEventByID(id int64) ([]event.Event, error) {
 	return []event.Event{e}, nil
 }
 
+//Delete will mark event as deleted
 func (storage *Storage) Delete(id int64) error {
 	e, ok := storage.events[id]
 	if !ok {

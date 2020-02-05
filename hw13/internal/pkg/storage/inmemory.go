@@ -1,38 +1,48 @@
-package inmemory
+package storage
 
 import (
 	"time"
 
-	"github.com/lenniDespero/otus-golang/hw13/internal/event"
-	stor "github.com/lenniDespero/otus-golang/hw13/internal/storage"
+	stor "github.com/lenniDespero/otus-golang/hw13/internal/models"
+	"github.com/lenniDespero/otus-golang/hw13/internal/types"
 )
 
 // Storage struct
 type Storage struct {
-	events map[int64]event.Event
+	events map[int64]types.Event
 }
+
+var maxId int64 = 0
 
 //New returns new storage
 func New() *Storage {
-	return &Storage{events: make(map[int64]event.Event)}
+	return &Storage{events: make(map[int64]types.Event)}
 }
 
-// Add event to storage.
-func (storage *Storage) Add(event event.Event) error {
+// Add types to storage.
+func (storage *Storage) Add(event types.Event) (int64, error) {
 	for _, e := range storage.events {
 		if inTimeSpan(e.DateStarted, e.DateComplete, event.DateStarted) ||
 			inTimeSpan(e.DateStarted, e.DateComplete, event.DateComplete) ||
 			inTimeSpan(event.DateStarted, event.DateComplete, e.DateStarted) ||
 			inTimeSpan(event.DateStarted, event.DateComplete, e.DateComplete) {
-			return stor.ErrDateBusy
+			return 0, stor.ErrDateBusy
 		}
 	}
+	if event.ID == 0 {
+		maxId++
+		event.ID = maxId
+	}
+	_, ok := storage.events[event.ID]
+	if ok {
+		return 0, stor.ErrEventIdExists
+	}
 	storage.events[event.ID] = event
-	return nil
+	return event.ID, nil
 }
 
-// Edit event data in data storage
-func (storage *Storage) Edit(id int64, event event.Event) error {
+// Edit types data in data storage
+func (storage *Storage) Edit(id int64, event types.Event) error {
 	e, ok := storage.events[id]
 	if !ok {
 		return stor.ErrNotFound
@@ -47,9 +57,9 @@ func (storage *Storage) Edit(id int64, event event.Event) error {
 }
 
 // GetEvents return all events
-func (storage *Storage) GetEvents() ([]event.Event, error) {
+func (storage *Storage) GetEvents() ([]types.Event, error) {
 	if len(storage.events) > 0 {
-		events := make([]event.Event, 0, len(storage.events))
+		events := make([]types.Event, 0, len(storage.events))
 		for _, e := range storage.events {
 			if !e.Deleted {
 				events = append(events, e)
@@ -59,21 +69,21 @@ func (storage *Storage) GetEvents() ([]event.Event, error) {
 			return events, nil
 		}
 	}
-	return []event.Event{}, stor.ErrNotFound
+	return []types.Event{}, stor.ErrNotFound
 }
 
-//GetEventByID return event with ID
-func (storage *Storage) GetEventByID(id int64) ([]event.Event, error) {
+//GetEventByID return types with ID
+func (storage *Storage) GetEventByID(id int64) ([]types.Event, error) {
 	e, ok := storage.events[id]
 	if !ok {
-		return []event.Event{}, stor.ErrNotFound
+		return []types.Event{}, stor.ErrNotFound
 	} else if e.Deleted == true {
-		return []event.Event{}, stor.ErrEventDeleted
+		return []types.Event{}, stor.ErrEventDeleted
 	}
-	return []event.Event{e}, nil
+	return []types.Event{e}, nil
 }
 
-//Delete will mark event as deleted
+//Delete will mark types as deleted
 func (storage *Storage) Delete(id int64) error {
 	e, ok := storage.events[id]
 	if !ok {

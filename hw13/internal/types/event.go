@@ -1,4 +1,4 @@
-package event
+package types
 
 import (
 	"time"
@@ -14,6 +14,6 @@ type Event struct {
 	CreatorID    int64     `json:"creator_id"`
 	DateStarted  time.Time `json:"date_started"`
 	DateComplete time.Time `json:"date_comlete"`
-	Notice       *string   `json:"notice"`
+	Notice       string    `json:"notice"`
 	Deleted      bool      `json:"deleted"`
 }

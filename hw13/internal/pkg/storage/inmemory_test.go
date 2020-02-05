@@ -1,8 +1,8 @@
-package inmemory
+package storage
 
 import (
-	"github.com/lenniDespero/otus-golang/hw13/internal/event"
-	stor "github.com/lenniDespero/otus-golang/hw13/internal/storage"
+	stor "github.com/lenniDespero/otus-golang/hw13/internal/models"
+	"github.com/lenniDespero/otus-golang/hw13/internal/types"
 	"reflect"
 	"testing"
 	"time"
@@ -11,7 +11,7 @@ import (
 func prepareStorage() *Storage {
 	storage := New()
 
-	storage.events = map[int64]event.Event{
+	storage.events = map[int64]types.Event{
 		1: {
 			ID:           1,
 			Title:        "first title",
@@ -48,7 +48,6 @@ func prepareStorage() *Storage {
 
 func TestNew(t *testing.T) {
 	storage1 := New()
-	//storage1.events[1] = event.Event{ID: 1, Title: "2"}
 	storage2 := New()
 	if !reflect.DeepEqual(storage1, storage2) {
 		t.Errorf("Not equal data in storage: %v, %v", storage1, storage2)
@@ -56,9 +55,9 @@ func TestNew(t *testing.T) {
 }
 
 func TestStorage_Add(t *testing.T) {
-	storage := prepareStorage()
-	newEvent := event.Event{
-		ID:           4,
+	storage := New()
+	newEvent := types.Event{
+		ID:           0,
 		Title:        "first title",
 		DateCreated:  time.Date(2020, time.January, 1, 12, 20, 12, 0, time.Local),
 		DateEdited:   time.Date(2020, time.January, 1, 12, 20, 12, 0, time.Local),
@@ -67,15 +66,38 @@ func TestStorage_Add(t *testing.T) {
 		Deleted:      true,
 		DateStarted:  time.Date(2020, time.January, 2, 21, 20, 12, 0, time.Local),
 		DateComplete: time.Date(2020, time.January, 2, 22, 20, 12, 0, time.Local)}
-	err := storage.Add(newEvent)
+	id, err := storage.Add(newEvent)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err.Error())
+	}
+	if id != 1 {
+		t.Errorf("unexpected id: %d, expected id = %d", id, 1)
+	}
+}
+
+func TestStorage_Add_With_Prepared(t *testing.T) {
+	storage := prepareStorage()
+	newEvent := types.Event{
+		ID:           0,
+		Title:        "first title",
+		DateCreated:  time.Date(2020, time.January, 1, 12, 20, 12, 0, time.Local),
+		DateEdited:   time.Date(2020, time.January, 1, 12, 20, 12, 0, time.Local),
+		EditorID:     12,
+		CreatorID:    13,
+		Deleted:      true,
+		DateStarted:  time.Date(2020, time.January, 2, 21, 20, 12, 0, time.Local),
+		DateComplete: time.Date(2020, time.January, 2, 22, 20, 12, 0, time.Local)}
+	_, err := storage.Add(newEvent)
+	if err == nil {
+		t.Errorf("expected error: %s, but get nil", stor.ErrEventIdExists)
+	} else if err != stor.ErrEventIdExists {
+		t.Errorf("expected error: %s, get %s", stor.ErrEventIdExists, err.Error())
 	}
 }
 
 func TestStorage_Add_Bad_Event(t *testing.T) {
 	storage := prepareStorage()
-	badEvent := event.Event{
+	badEvent := types.Event{
 		ID:           5,
 		Title:        "first title",
 		DateCreated:  time.Date(2020, time.January, 1, 12, 20, 12, 0, time.Local),
@@ -85,7 +107,7 @@ func TestStorage_Add_Bad_Event(t *testing.T) {
 		Deleted:      true,
 		DateStarted:  time.Date(2020, time.January, 2, 21, 20, 12, 0, time.Local),
 		DateComplete: time.Date(2020, time.January, 3, 10, 20, 12, 0, time.Local)}
-	err := storage.Add(badEvent)
+	_, err := storage.Add(badEvent)
 	if err == nil {
 		t.Errorf("expected error: %s, but get nil", stor.ErrDateBusy)
 	} else if err != stor.ErrDateBusy {
@@ -180,7 +202,7 @@ func TestStorage_Edit_Change_ID(t *testing.T) {
 }
 
 func TestStorage_Edit_Not_Found(t *testing.T) {
-	event := event.Event{
+	event := types.Event{
 		ID:           4,
 		Title:        "first title",
 		DateCreated:  time.Date(2020, time.January, 1, 12, 20, 12, 0, time.Local),
@@ -202,7 +224,7 @@ func TestStorage_Edit_Not_Found(t *testing.T) {
 }
 
 func TestStorage_Edit_Deleted(t *testing.T) {
-	event := event.Event{
+	event := types.Event{
 		ID:           4,
 		Title:        "first title",
 		DateCreated:  time.Date(2020, time.January, 1, 12, 20, 12, 0, time.Local),
@@ -224,7 +246,7 @@ func TestStorage_Edit_Deleted(t *testing.T) {
 }
 
 func TestStorage_GetEventByID(t *testing.T) {
-	testEvent := event.Event{
+	testEvent := types.Event{
 		ID:           1,
 		Title:        "first title",
 		DateCreated:  time.Date(2020, time.January, 1, 12, 20, 12, 0, time.Local),
@@ -259,14 +281,14 @@ func TestStorage_GetEventByID_NotFound(t *testing.T) {
 	_, err := storage.GetEventByID(13)
 	if err == nil {
 		t.Errorf("expected error: %s, get nil", stor.ErrEventDeleted)
-	} else if err != stor.ErrNotFound {
-		t.Errorf("expected error: %s, get: %s", stor.ErrNotFound, err.Error())
+	} else if err != stor.ErrEventDeleted {
+		t.Errorf("expected error: %s, get: %s", stor.ErrEventDeleted, err.Error())
 	}
 }
 
 func TestStorage_GetEvents(t *testing.T) {
 	storage := prepareStorage()
-	testEvents := []event.Event{
+	testEvents := []types.Event{
 		{
 			ID:           1,
 			Title:        "first title",

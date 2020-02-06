@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	stor "github.com/lenniDespero/otus-golang/hw13/internal/models"
 	"github.com/lenniDespero/otus-golang/hw13/internal/pkg/storage"
+	stor "github.com/lenniDespero/otus-golang/hw13/internal/pkg/types"
 )
 
 type inputData struct {
@@ -47,7 +47,7 @@ func prepareCalendar() *Calendar {
 	return calendar
 }
 
-func getLastId(calendar *Calendar) int64 {
+func getLastId(calendar *Calendar) string {
 	events, err := calendar.GetEvents()
 	if err != nil {
 		log.Fatalf("unexpected error: %s", err.Error())
@@ -65,12 +65,9 @@ func TestNew(t *testing.T) {
 
 func TestCalendar_Add(t *testing.T) {
 	calendar := prepareCalendar()
-	id, err := calendar.Add("some event", time.Date(2021, time.January, 3, 9, 20, 12, 0, time.Local), time.Date(2021, time.January, 3, 10, 20, 12, 0, time.Local), "something", 13)
+	_, err := calendar.Add("some event", time.Date(2021, time.January, 3, 9, 20, 12, 0, time.Local), time.Date(2021, time.January, 3, 10, 20, 12, 0, time.Local), "something", 13)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err.Error())
-	}
-	if id != 4 {
-		t.Errorf("unexpected id: %d, expected %d", id, 4)
 	}
 }
 
@@ -108,7 +105,7 @@ func TestCalendar_GetEvents(t *testing.T) {
 func TestCalendar_Delete(t *testing.T) {
 	calendar := prepareCalendar()
 	id := getLastId(calendar)
-	err := calendar.Remove(id)
+	err := calendar.Delete(id)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err.Error())
 	}

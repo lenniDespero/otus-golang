@@ -15,7 +15,7 @@ import (
 	"github.com/lenniDespero/otus-golang/hw13/internal/pkg/storage"
 
 	"github.com/gorilla/mux"
-	"github.com/lenniDespero/otus-golang/hw13/internal/logger"
+	"github.com/lenniDespero/otus-golang/hw13/internal/pkg/logger"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
@@ -33,7 +33,7 @@ func main() {
 	}
 	logger.Init(viper.GetString("log.log_level"), viper.GetString("log.log_file"))
 	inMemoryStorage := storage.New()
-	_ := calendar.New(inMemoryStorage)
+	_ = calendar.New(inMemoryStorage)
 	logger.Info("Calendar was created")
 	InitServer(viper.GetString("http_listen.ip"), viper.GetString("http_listen.port"))
 }

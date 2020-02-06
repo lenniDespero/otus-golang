@@ -1,4 +1,4 @@
-package models
+package types
 
 //Error type of storage
 type Error string

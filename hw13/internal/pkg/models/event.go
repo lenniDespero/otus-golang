@@ -1,4 +1,4 @@
-package types
+package models
 
 import (
 	"time"
@@ -6,7 +6,7 @@ import (
 
 //Event structure
 type Event struct {
-	ID           int64     `json:"id"`
+	ID           string    `json:"id"`
 	Title        string    `json:"title" validate:"required"`
 	DateEdited   time.Time `json:"date_edited"`
 	EditorID     int64     `json:"editor_id"`

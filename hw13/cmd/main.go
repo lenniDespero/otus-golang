@@ -4,7 +4,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -12,30 +11,24 @@ import (
 	"time"
 
 	"github.com/lenniDespero/otus-golang/hw13/internal/calendar"
+	"github.com/lenniDespero/otus-golang/hw13/internal/pkg/config"
 	"github.com/lenniDespero/otus-golang/hw13/internal/pkg/storage"
 
 	"github.com/gorilla/mux"
 	"github.com/lenniDespero/otus-golang/hw13/internal/pkg/logger"
 	"github.com/spf13/pflag"
-	"github.com/spf13/viper"
 )
 
 func main() {
-	flag.String("config", "../config/application.yml", "path to configuration flag")
-
+	var configPath = flag.String("config", "../config/application.yml", "path to configuration flag")
 	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
-	pflag.Parse()
-	_ = viper.BindPFlags(pflag.CommandLine)
-	configPath := viper.GetString("config")
-	viper.SetConfigFile(configPath)
-	if err := viper.ReadInConfig(); err != nil {
-		log.Fatalf("Couldn't read configuration file: %s", err.Error())
-	}
-	logger.Init(viper.GetString("log.log_level"), viper.GetString("log.log_file"))
+	flag.Parse()
+	conf := config.GetConfigFromFile(*configPath)
+	logger.Init(conf.Log.LogLevel, conf.Log.LogFile)
 	inMemoryStorage := storage.New()
 	_ = calendar.New(inMemoryStorage)
 	logger.Info("Calendar was created")
-	InitServer(viper.GetString("http_listen.ip"), viper.GetString("http_listen.port"))
+	InitServer(conf.HttpListen.Ip, conf.HttpListen.Port)
 }
 
 //Init http server

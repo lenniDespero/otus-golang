@@ -9,6 +9,7 @@ import (
 type Config struct {
 	Log        Log        `json:"log"`
 	HttpListen HttpListen `json:"http_listen"`
+	GrpcServer GrpcServer `json:"grpc_server"`
 }
 
 type Log struct {
@@ -21,11 +22,17 @@ type HttpListen struct {
 	Port string `json:"port"`
 }
 
+type GrpcServer struct {
+	Host string `json:"ip"`
+	Port string `json:"port"`
+}
+
 func GetConfigFromFile(filePath string) *Config {
 	viper.SetConfigFile(filePath)
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatalf("Couldn't read configuration file: %s", err.Error())
 	}
 	return &Config{Log: Log{LogFile: viper.GetString("log.log_file"), LogLevel: viper.GetString("log.log_level")},
-		HttpListen: HttpListen{Ip: viper.GetString("http_listen.ip"), Port: viper.GetString("http_listen.port")}}
+		HttpListen: HttpListen{Ip: viper.GetString("http_listen.ip"), Port: viper.GetString("http_listen.port")},
+		GrpcServer: GrpcServer{Host: viper.GetString("grpc.host"), Port: viper.GetString("grpc.port")}}
 }

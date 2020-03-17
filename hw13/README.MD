@@ -37,4 +37,6 @@ GRPC сервис
 Создать отдельный директорию для кода GRPC сервера  
 Сгенерировать код GRPC сервера на основе Protobuf спек (скрипт генерации сохранить в репозиторий).  
 Написать код, связывающий GRPC сервер с методами доменной области.  
-
+Запуск сервера: `cd grpc && go run server/server.go -config=../config/application.yml`  
+Запуск клиента: `cd grpc && go run client/client.go -config=../config/application.yml`  
+Генерация кода на основе спек: `protoc -I grpc/event/ grpc/event/event.proto --go_out=plugins=grpc:grpc/event`  

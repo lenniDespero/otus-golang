@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 import "google/protobuf/timestamp.proto";
-// protoc -I grpc/event/ grpc/event/event.proto --go_out=plugins=grpc:grpc/event
+// protoc -I grpc/event/ grpc/event/calendar.proto --go_out=plugins=grpc:grpc/event
 package events;
 option go_package = "eventproto";
 

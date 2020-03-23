@@ -4,14 +4,17 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"log"
 	"net"
+	"os/user"
+	"strconv"
+
+	"github.com/lenniDespero/otus-golang/hw13/internal/pkg/client"
+
+	"github.com/lenniDespero/otus-golang/hw13/internal/calendar"
 
 	"github.com/lenniDespero/otus-golang/hw13/internal/pkg/config"
 	"github.com/lenniDespero/otus-golang/hw13/internal/pkg/logger"
 	"github.com/spf13/pflag"
-
-	eventproto "github.com/lenniDespero/otus-golang/hw13/grpc/event"
 
 	"github.com/lenniDespero/otus-golang/hw13/internal/pkg/models"
 	"github.com/lenniDespero/otus-golang/hw13/internal/pkg/storage"
@@ -22,11 +25,11 @@ import (
 )
 
 type calendarpb struct {
-	Events storage.Storage
+	Calendar calendar.Calendar
 }
 
-func (c calendarpb) Edit(ctx context.Context, e *eventproto.EventEditRequest) (*eventproto.EventEditResponse, error) {
-	log.Print(fmt.Sprintf("Got request Edit %v", e.String()))
+func (c calendarpb) Edit(ctx context.Context, e *client.EventEditRequest) (*client.EventEditResponse, error) {
+	logger.Info(fmt.Sprintf("Got request Edit %v", e.String()))
 	startDate, err := ptypes.Timestamp(e.Event.DateStarted)
 	if err != nil {
 		return nil, err
@@ -35,50 +38,53 @@ func (c calendarpb) Edit(ctx context.Context, e *eventproto.EventEditRequest) (*
 	if err != nil {
 		return nil, err
 	}
-
-	err = c.Events.Edit(e.Id, models.Event{ID: e.Event.Id, Title: e.Event.Title, DateStarted: startDate, DateComplete: endDate, Notice: e.Event.Notice})
+	userId, err := getUserId()
 	if err != nil {
 		return nil, err
 	}
-	return &eventproto.EventEditResponse{}, nil
+	err = c.Calendar.Edit(e.Id, models.Event{ID: e.Event.Id, Title: e.Event.Title, DateStarted: startDate, DateComplete: endDate, Notice: e.Event.Notice}, userId)
+	if err != nil {
+		return nil, err
+	}
+	return &client.EventEditResponse{}, nil
 }
 
-func (c calendarpb) Delete(ctx context.Context, e *eventproto.EventDeleteRequest) (*eventproto.EventDeleteResponse, error) {
+func (c calendarpb) Delete(ctx context.Context, e *client.EventDeleteRequest) (*client.EventDeleteResponse, error) {
 	logger.Info(fmt.Sprintf("Got request Delete %v", e.String()))
-	err := c.Events.Delete(e.Id)
+	err := c.Calendar.Delete(e.Id)
 	if err != nil {
 		return nil, err
 	}
-	return &eventproto.EventDeleteResponse{}, nil
+	return &client.EventDeleteResponse{}, nil
 }
 
-func (c calendarpb) Get(ctx context.Context, e *eventproto.EventGetByIdRequest) (*eventproto.EventGetByIdResponse, error) {
+func (c calendarpb) Get(ctx context.Context, e *client.EventGetByIdRequest) (*client.EventGetByIdResponse, error) {
 	logger.Info(fmt.Sprintf("Got request Get %v", e.String()))
-	ev, err := c.Events.GetEventByID(e.Id)
+	ev, err := c.Calendar.GetEventByID(e.Id)
 	if err != nil {
 		return nil, err
 	}
-	respEvents := make([]*eventproto.Event, 0, len(ev))
+	respEvents := make([]*client.Event, 0, len(ev))
 	for _, row := range ev {
 		respEvents = append(respEvents, convertToProtoEvent(&row))
 	}
-	return &eventproto.EventGetByIdResponse{Events: respEvents}, nil
+	return &client.EventGetByIdResponse{Events: respEvents}, nil
 }
 
-func (c calendarpb) GetAll(ctx context.Context, e *eventproto.EventGetAllRequest) (*eventproto.EventGetAllResponse, error) {
+func (c calendarpb) GetAll(ctx context.Context, e *client.EventGetAllRequest) (*client.EventGetAllResponse, error) {
 	logger.Info(fmt.Sprintf("Got request GetAll %v", e.String()))
-	ev, err := c.Events.GetEvents()
+	ev, err := c.Calendar.GetEvents()
 	if err != nil {
 		return nil, err
 	}
-	respEvents := make([]*eventproto.Event, 0, len(ev))
+	respEvents := make([]*client.Event, 0, len(ev))
 	for _, row := range ev {
 		respEvents = append(respEvents, convertToProtoEvent(&row))
 	}
-	return &eventproto.EventGetAllResponse{Events: respEvents}, nil
+	return &client.EventGetAllResponse{Events: respEvents}, nil
 }
 
-func (c calendarpb) Add(ctx context.Context, e *eventproto.EventAddRequest) (*eventproto.EventAddResponse, error) {
+func (c calendarpb) Add(ctx context.Context, e *client.EventAddRequest) (*client.EventAddResponse, error) {
 	startDate, err := ptypes.Timestamp(e.DateStarted)
 	if err != nil {
 		return nil, err
@@ -87,12 +93,16 @@ func (c calendarpb) Add(ctx context.Context, e *eventproto.EventAddRequest) (*ev
 	if err != nil {
 		return nil, err
 	}
+	userId, err := getUserId()
+	if err != nil {
+		return nil, err
+	}
 	logger.Info(fmt.Sprintf("Got request Add %v", models.Event{Title: e.Title, DateStarted: startDate, DateComplete: endDate}))
-	id, err := c.Events.Add(models.Event{Title: e.Title, DateStarted: startDate, DateComplete: endDate, Notice: e.Notice})
-	return &eventproto.EventAddResponse{Id: id}, err
+	id, err := c.Calendar.Add(e.Title, startDate, endDate, e.Notice, userId)
+	return &client.EventAddResponse{Id: id}, err
 }
 
-func convertToProtoEvent(event *models.Event) *eventproto.Event {
+func convertToProtoEvent(event *models.Event) *client.Event {
 	dateStart, err := ptypes.TimestampProto(event.DateStarted)
 	if err != nil {
 		logger.Fatal("Cant't convert %v to timestamp proto", event.DateStarted)
@@ -101,7 +111,7 @@ func convertToProtoEvent(event *models.Event) *eventproto.Event {
 	if err != nil {
 		logger.Fatal("Cant't convert %v to timestamp proto", event.DateStarted)
 	}
-	return &eventproto.Event{
+	return &client.Event{
 		Id:           event.ID,
 		Title:        event.Title,
 		DateStarted:  dateStart,
@@ -110,15 +120,27 @@ func convertToProtoEvent(event *models.Event) *eventproto.Event {
 	}
 }
 
-func StartGrpcServer(storage storage.Storage, address string, port string) {
+func StartGrpcServer(calendar calendar.Calendar, address string, port string) {
 	lis, err := net.Listen("tcp", fmt.Sprintf("%v:%s", address, port))
 	if err != nil {
 		logger.Fatal("failed to listen %v", err)
 	}
 	grpcServer := grpc.NewServer()
 	reflection.Register(grpcServer)
-	eventproto.RegisterEventServiceServer(grpcServer, &calendarpb{Events: storage})
+	client.RegisterEventServiceServer(grpcServer, &calendarpb{Calendar: calendar})
 	grpcServer.Serve(lis)
+}
+
+func getUserId() (int64, error) {
+	user, err := user.Current()
+	if err != nil {
+		return 0, err
+	}
+	id, err := strconv.ParseInt(user.Uid, 10, 64)
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
 }
 
 func main() {
@@ -128,6 +150,7 @@ func main() {
 	conf := config.GetConfigFromFile(*configPath)
 	logger.Init(conf.Log.LogLevel, conf.Log.LogFile)
 	inMemoryStorage := storage.New()
+	calendar := calendar.New(inMemoryStorage)
 	logger.Info("GRPC server start")
-	StartGrpcServer(*inMemoryStorage, conf.GrpcServer.Host, conf.GrpcServer.Port)
+	StartGrpcServer(*calendar, conf.GrpcServer.Host, conf.GrpcServer.Port)
 }

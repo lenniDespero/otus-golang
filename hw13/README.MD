@@ -39,4 +39,4 @@ GRPC сервис
 Написать код, связывающий GRPC сервер с методами доменной области.  
 Запуск сервера: `cd grpc && go run server/server.go -config=../config/application.yml`  
 Запуск клиента: `cd grpc && go run client/client.go -config=../config/application.yml`  
-Генерация кода на основе спек: `protoc -I grpc/event/ grpc/event/event.proto --go_out=plugins=grpc:grpc/event`  
+Генерация кода на основе спек: `protoc -I api/ api/calendar.proto --go_out=plugins=grpc:internal/pkg/`  

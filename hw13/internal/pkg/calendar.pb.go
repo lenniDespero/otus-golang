@@ -3,7 +3,7 @@
 
 // protoc -I api/ api/calendar.proto --go_out=plugins=grpc:internal/pkg/client
 
-package client
+package pkg
 
 import (
 	context "context"

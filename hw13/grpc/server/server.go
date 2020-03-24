@@ -8,7 +8,7 @@ import (
 	"os/user"
 	"strconv"
 
-	"github.com/lenniDespero/otus-golang/hw13/internal/pkg/client"
+	"github.com/lenniDespero/otus-golang/hw13/internal/pkg"
 
 	"github.com/lenniDespero/otus-golang/hw13/internal/calendar"
 
@@ -25,10 +25,10 @@ import (
 )
 
 type calendarpb struct {
-	Calendar calendar.Calendar
+	сalendar calendar.Calendar
 }
 
-func (c calendarpb) Edit(ctx context.Context, e *client.EventEditRequest) (*client.EventEditResponse, error) {
+func (c calendarpb) Edit(ctx context.Context, e *pkg.EventEditRequest) (*pkg.EventEditResponse, error) {
 	logger.Info(fmt.Sprintf("Got request Edit %v", e.String()))
 	startDate, err := ptypes.Timestamp(e.Event.DateStarted)
 	if err != nil {
@@ -42,49 +42,49 @@ func (c calendarpb) Edit(ctx context.Context, e *client.EventEditRequest) (*clie
 	if err != nil {
 		return nil, err
 	}
-	err = c.Calendar.Edit(e.Id, models.Event{ID: e.Event.Id, Title: e.Event.Title, DateStarted: startDate, DateComplete: endDate, Notice: e.Event.Notice}, userId)
+	err = c.сalendar.Edit(e.Id, models.Event{ID: e.Event.Id, Title: e.Event.Title, DateStarted: startDate, DateComplete: endDate, Notice: e.Event.Notice}, userId)
 	if err != nil {
 		return nil, err
 	}
-	return &client.EventEditResponse{}, nil
+	return &pkg.EventEditResponse{}, nil
 }
 
-func (c calendarpb) Delete(ctx context.Context, e *client.EventDeleteRequest) (*client.EventDeleteResponse, error) {
+func (c calendarpb) Delete(ctx context.Context, e *pkg.EventDeleteRequest) (*pkg.EventDeleteResponse, error) {
 	logger.Info(fmt.Sprintf("Got request Delete %v", e.String()))
-	err := c.Calendar.Delete(e.Id)
+	err := c.сalendar.Delete(e.Id)
 	if err != nil {
 		return nil, err
 	}
-	return &client.EventDeleteResponse{}, nil
+	return &pkg.EventDeleteResponse{}, nil
 }
 
-func (c calendarpb) Get(ctx context.Context, e *client.EventGetByIdRequest) (*client.EventGetByIdResponse, error) {
+func (c calendarpb) Get(ctx context.Context, e *pkg.EventGetByIdRequest) (*pkg.EventGetByIdResponse, error) {
 	logger.Info(fmt.Sprintf("Got request Get %v", e.String()))
-	ev, err := c.Calendar.GetEventByID(e.Id)
+	ev, err := c.сalendar.GetEventByID(e.Id)
 	if err != nil {
 		return nil, err
 	}
-	respEvents := make([]*client.Event, 0, len(ev))
+	respEvents := make([]*pkg.Event, 0, len(ev))
 	for _, row := range ev {
 		respEvents = append(respEvents, convertToProtoEvent(&row))
 	}
-	return &client.EventGetByIdResponse{Events: respEvents}, nil
+	return &pkg.EventGetByIdResponse{Events: respEvents}, nil
 }
 
-func (c calendarpb) GetAll(ctx context.Context, e *client.EventGetAllRequest) (*client.EventGetAllResponse, error) {
+func (c calendarpb) GetAll(ctx context.Context, e *pkg.EventGetAllRequest) (*pkg.EventGetAllResponse, error) {
 	logger.Info(fmt.Sprintf("Got request GetAll %v", e.String()))
-	ev, err := c.Calendar.GetEvents()
+	ev, err := c.сalendar.GetEvents()
 	if err != nil {
 		return nil, err
 	}
-	respEvents := make([]*client.Event, 0, len(ev))
+	respEvents := make([]*pkg.Event, 0, len(ev))
 	for _, row := range ev {
 		respEvents = append(respEvents, convertToProtoEvent(&row))
 	}
-	return &client.EventGetAllResponse{Events: respEvents}, nil
+	return &pkg.EventGetAllResponse{Events: respEvents}, nil
 }
 
-func (c calendarpb) Add(ctx context.Context, e *client.EventAddRequest) (*client.EventAddResponse, error) {
+func (c calendarpb) Add(ctx context.Context, e *pkg.EventAddRequest) (*pkg.EventAddResponse, error) {
 	startDate, err := ptypes.Timestamp(e.DateStarted)
 	if err != nil {
 		return nil, err
@@ -98,11 +98,11 @@ func (c calendarpb) Add(ctx context.Context, e *client.EventAddRequest) (*client
 		return nil, err
 	}
 	logger.Info(fmt.Sprintf("Got request Add %v", models.Event{Title: e.Title, DateStarted: startDate, DateComplete: endDate}))
-	id, err := c.Calendar.Add(e.Title, startDate, endDate, e.Notice, userId)
-	return &client.EventAddResponse{Id: id}, err
+	id, err := c.сalendar.Add(e.Title, startDate, endDate, e.Notice, userId)
+	return &pkg.EventAddResponse{Id: id}, err
 }
 
-func convertToProtoEvent(event *models.Event) *client.Event {
+func convertToProtoEvent(event *models.Event) *pkg.Event {
 	dateStart, err := ptypes.TimestampProto(event.DateStarted)
 	if err != nil {
 		logger.Fatal("Cant't convert %v to timestamp proto", event.DateStarted)
@@ -111,7 +111,7 @@ func convertToProtoEvent(event *models.Event) *client.Event {
 	if err != nil {
 		logger.Fatal("Cant't convert %v to timestamp proto", event.DateStarted)
 	}
-	return &client.Event{
+	return &pkg.Event{
 		Id:           event.ID,
 		Title:        event.Title,
 		DateStarted:  dateStart,
@@ -127,7 +127,7 @@ func StartGrpcServer(calendar calendar.Calendar, address string, port string) {
 	}
 	grpcServer := grpc.NewServer()
 	reflection.Register(grpcServer)
-	client.RegisterEventServiceServer(grpcServer, &calendarpb{Calendar: calendar})
+	pkg.RegisterEventServiceServer(grpcServer, &calendarpb{сalendar: calendar})
 	grpcServer.Serve(lis)
 }
 

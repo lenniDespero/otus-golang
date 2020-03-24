@@ -5,7 +5,7 @@ import (
 	"flag"
 	"time"
 
-	"github.com/lenniDespero/otus-golang/hw13/internal/pkg/client"
+	"github.com/lenniDespero/otus-golang/hw13/internal/pkg"
 
 	"github.com/lenniDespero/otus-golang/hw13/internal/pkg/config"
 	"github.com/lenniDespero/otus-golang/hw13/internal/pkg/logger"
@@ -28,18 +28,18 @@ func main() {
 	}
 	defer cc.Close()
 
-	c := client.NewEventServiceClient(cc)
+	c := pkg.NewEventServiceClient(cc)
 	ctx, cancel := context.WithTimeout(context.Background(), 400*time.Millisecond)
 	defer cancel()
 	logger.Info("Send request Add")
-	answer1, err := c.Add(ctx, &client.EventAddRequest{Title: "test", DateStarted: ptypes.TimestampNow(), DateComplete: ptypes.TimestampNow(), Notice: "test notice"})
+	answer1, err := c.Add(ctx, &pkg.EventAddRequest{Title: "test", DateStarted: ptypes.TimestampNow(), DateComplete: ptypes.TimestampNow(), Notice: "test notice"})
 	if err != nil {
 		logger.Fatal(err.Error())
 	}
 	logger.Debug("ok")
 
 	logger.Info("Send request Get")
-	answer2, err := c.Get(ctx, &client.EventGetByIdRequest{Id: answer1.Id})
+	answer2, err := c.Get(ctx, &pkg.EventGetByIdRequest{Id: answer1.Id})
 	if err != nil {
 		logger.Fatal(err.Error())
 	}
@@ -48,21 +48,21 @@ func main() {
 	event := answer2.Events[0]
 	event.Notice = "new notice"
 	logger.Info("Send request Edit")
-	_, err = c.Edit(ctx, &client.EventEditRequest{Id: event.Id, Event: event})
+	_, err = c.Edit(ctx, &pkg.EventEditRequest{Id: event.Id, Event: event})
 	if err != nil {
 		logger.Fatal(err.Error())
 	}
 	logger.Debug("ok")
 
 	logger.Info("Send request GetAll")
-	answer4, err := c.GetAll(ctx, &client.EventGetAllRequest{})
+	answer4, err := c.GetAll(ctx, &pkg.EventGetAllRequest{})
 	if err != nil {
 		logger.Fatal(err.Error())
 	}
 	logger.Info(answer4.String())
 
 	logger.Info("Send request Delete")
-	_, err = c.Delete(ctx, &client.EventDeleteRequest{Id: answer1.Id})
+	_, err = c.Delete(ctx, &pkg.EventDeleteRequest{Id: answer1.Id})
 	if err != nil {
 		logger.Fatal(err.Error())
 	}

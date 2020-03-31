@@ -28,3 +28,15 @@
 * log_file - путь к файлу логов  
 * log_level - уровень логирования (error / warn / info / debug)  
 
+## Part 3
+GRPC сервис
+Цель: Создать GRPC API для сервиса календаря Тех. задание: https://github.com/OtusTeam/Go/blob/master/project-calendar.md Цель данного занятия: отработка навыков работы с GRPC, построение современного API.  
+Создать отдельную директорию для Protobuf спек.  
+Создать Protobuf спеки с описанием всех методов API, их объектов запросов и ответов.  
+Т.к. объект Event будет использоваться во многих ответах разумно выделить его в отдельный message.  
+Создать отдельный директорию для кода GRPC сервера  
+Сгенерировать код GRPC сервера на основе Protobuf спек (скрипт генерации сохранить в репозиторий).  
+Написать код, связывающий GRPC сервер с методами доменной области.  
+Запуск сервера: `cd grpc && go run server/server.go -config=../config/application.yml`  
+Запуск клиента: `cd grpc && go run client/client.go -config=../config/application.yml`  
+Генерация кода на основе спек: `protoc -I api/ api/calendar.proto --go_out=plugins=grpc:internal/pkg/`  

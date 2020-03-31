@@ -29,7 +29,8 @@ type DBConfig struct {
 	Host     string `json:"host"`
 	Port     string `json:"port"`
 	Database string `json:"database"`
-  
+}
+
 type GrpcServer struct {
 	Host string `json:"ip"`
 	Port string `json:"port"`
@@ -44,6 +45,6 @@ func GetConfigFromFile(filePath string) *Config {
 		HttpListen: HttpListen{Ip: viper.GetString("http_listen.ip"), Port: viper.GetString("http_listen.port")},
 		DBConfig: DBConfig{User: viper.GetString("db.user"), Password: viper.GetString("db.password"),
 			Host: viper.GetString("db.host"), Port: viper.GetString("db.port"), Database: viper.GetString("db.database")},
-		GrpcServer: GrpcServer{Host: viper.GetString("grpc.host"), Port: viper.GetString("grpc.port")}
+		GrpcServer: GrpcServer{Host: viper.GetString("grpc.host"), Port: viper.GetString("grpc.port")},
 	}
 }

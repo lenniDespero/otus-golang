@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"context"
 	"reflect"
 	"testing"
 	"time"
@@ -67,7 +68,7 @@ func TestStorage_Add(t *testing.T) {
 		Deleted:      true,
 		DateStarted:  time.Date(2020, time.January, 2, 21, 20, 12, 0, time.Local),
 		DateComplete: time.Date(2020, time.January, 2, 22, 20, 12, 0, time.Local)}
-	_, err := storage.Add(newEvent)
+	_, err := storage.Add(newEvent, context.Background())
 	if err != nil {
 		t.Errorf("unexpected error: %s", err.Error())
 	}
@@ -85,7 +86,7 @@ func TestStorage_Add_With_Prepared(t *testing.T) {
 		Deleted:      true,
 		DateStarted:  time.Date(2020, time.January, 2, 21, 20, 12, 0, time.Local),
 		DateComplete: time.Date(2020, time.January, 2, 22, 20, 12, 0, time.Local)}
-	_, err := storage.Add(newEvent)
+	_, err := storage.Add(newEvent, context.Background())
 	if err == nil {
 		t.Errorf("expected error: %s, but get nil", stor.ErrEventIdExists)
 	} else if err != stor.ErrEventIdExists {
@@ -105,7 +106,7 @@ func TestStorage_Add_Bad_Event(t *testing.T) {
 		Deleted:      true,
 		DateStarted:  time.Date(2020, time.January, 2, 21, 20, 12, 0, time.Local),
 		DateComplete: time.Date(2020, time.January, 3, 10, 20, 12, 0, time.Local)}
-	_, err := storage.Add(badEvent)
+	_, err := storage.Add(badEvent, context.Background())
 	if err == nil {
 		t.Errorf("expected error: %s, but get nil", stor.ErrDateBusy)
 	} else if err != stor.ErrDateBusy {
@@ -115,17 +116,17 @@ func TestStorage_Add_Bad_Event(t *testing.T) {
 
 func TestStorage_Delete(t *testing.T) {
 	storage := prepareStorage()
-	err := storage.Delete("1")
+	err := storage.Delete("1", context.Background())
 	if err != nil {
 		t.Errorf("unexpected error: %s", err.Error())
 	}
-	err = storage.Delete("1")
+	err = storage.Delete("1", context.Background())
 	if err == nil {
 		t.Errorf("expected error: %s", stor.ErrEventDeleted)
 	} else if err != stor.ErrEventDeleted {
 		t.Errorf("expected error: %s, get %s", stor.ErrEventDeleted, err.Error())
 	}
-	err = storage.Delete("4")
+	err = storage.Delete("4", context.Background())
 	if err == nil {
 		t.Errorf("expected error: %s", stor.ErrNotFound)
 	} else if err != stor.ErrNotFound {
@@ -136,7 +137,7 @@ func TestStorage_Delete(t *testing.T) {
 func TestStorage_Delete_Deleted(t *testing.T) {
 	storage := prepareStorage()
 
-	err := storage.Delete("3")
+	err := storage.Delete("3", context.Background())
 	if err == nil {
 		t.Errorf("expected error: %s", stor.ErrEventDeleted)
 	} else if err != stor.ErrEventDeleted {
@@ -146,7 +147,7 @@ func TestStorage_Delete_Deleted(t *testing.T) {
 
 func TestStorage_Delete_Wrong(t *testing.T) {
 	storage := prepareStorage()
-	err := storage.Delete("4")
+	err := storage.Delete("4", context.Background())
 	if err == nil {
 		t.Errorf("expected error: %s", stor.ErrNotFound)
 	} else if err != stor.ErrNotFound {
@@ -156,16 +157,16 @@ func TestStorage_Delete_Wrong(t *testing.T) {
 
 func TestStorage_Edit(t *testing.T) {
 	storage := prepareStorage()
-	event, err := storage.GetEventByID("2")
+	event, err := storage.GetEventByID("2", context.Background())
 	if err != nil {
 		t.Errorf("unexpected error: %s", err.Error())
 	}
 	event[0].Title = "new Title"
-	err = storage.Edit(event[0].ID, event[0])
+	err = storage.Edit(event[0].ID, event[0], context.Background())
 	if err != nil {
 		t.Errorf("unexpected error: %s", err.Error())
 	}
-	newEvent, err := storage.GetEventByID("2")
+	newEvent, err := storage.GetEventByID("2", context.Background())
 	if err != nil {
 		t.Errorf("unexpected error: %s", err.Error())
 	}
@@ -178,22 +179,22 @@ func TestStorage_Edit_Change_ID(t *testing.T) {
 	storage := prepareStorage()
 	id := "2"
 	newId := "13"
-	event, err := storage.GetEventByID(id)
+	event, err := storage.GetEventByID(id, context.Background())
 	if err != nil {
 		t.Errorf("unexpected error: %s", err.Error())
 	}
 	event[0].ID = newId
-	err = storage.Edit(id, event[0])
+	err = storage.Edit(id, event[0], context.Background())
 	if err != nil {
 		t.Errorf("unexpected error: %s", err.Error())
 	}
-	event, err = storage.GetEventByID(id)
+	event, err = storage.GetEventByID(id, context.Background())
 	if err == nil {
 		t.Errorf("expected error: %s, get nil", stor.ErrNotFound)
 	} else if err != stor.ErrNotFound {
 		t.Errorf("expected error: %s, get : %s", stor.ErrNotFound, err.Error())
 	}
-	event, err = storage.GetEventByID(newId)
+	event, err = storage.GetEventByID(newId, context.Background())
 	if err != nil {
 		t.Errorf("unexpected error: %s", err.Error())
 	}
@@ -212,7 +213,7 @@ func TestStorage_Edit_Not_Found(t *testing.T) {
 		DateComplete: time.Date(2020, time.January, 2, 22, 20, 12, 0, time.Local)}
 	storage := prepareStorage()
 	id := "12"
-	err := storage.Edit(id, event)
+	err := storage.Edit(id, event, context.Background())
 	if err == nil {
 		t.Errorf("expected error: %s, get nil", stor.ErrNotFound)
 	}
@@ -234,7 +235,7 @@ func TestStorage_Edit_Deleted(t *testing.T) {
 		DateComplete: time.Date(2020, time.January, 2, 22, 20, 12, 0, time.Local)}
 	storage := prepareStorage()
 	id := "3"
-	err := storage.Edit(id, event)
+	err := storage.Edit(id, event, context.Background())
 	if err == nil {
 		t.Errorf("expected error: %s, get nil", stor.ErrEventDeleted)
 	}
@@ -255,7 +256,7 @@ func TestStorage_GetEventByID(t *testing.T) {
 		DateStarted:  time.Date(2020, time.January, 1, 13, 20, 12, 0, time.Local),
 		DateComplete: time.Date(2020, time.January, 1, 14, 20, 12, 0, time.Local)}
 	storage := prepareStorage()
-	e, err := storage.GetEventByID("1")
+	e, err := storage.GetEventByID("1", context.Background())
 	if err != nil {
 		t.Errorf("unexpected error: %s", err.Error())
 	}
@@ -266,7 +267,7 @@ func TestStorage_GetEventByID(t *testing.T) {
 
 func TestStorage_GetEventByID_Deleted(t *testing.T) {
 	storage := prepareStorage()
-	_, err := storage.GetEventByID("3")
+	_, err := storage.GetEventByID("3", context.Background())
 	if err == nil {
 		t.Errorf("expected error: %s, get nil", stor.ErrEventDeleted)
 	} else if err != stor.ErrEventDeleted {
@@ -276,7 +277,7 @@ func TestStorage_GetEventByID_Deleted(t *testing.T) {
 
 func TestStorage_GetEventByID_NotFound(t *testing.T) {
 	storage := prepareStorage()
-	_, err := storage.GetEventByID("13")
+	_, err := storage.GetEventByID("13", context.Background())
 	if err == nil {
 		t.Errorf("expected error: %s, get nil", stor.ErrNotFound)
 	} else if err != stor.ErrNotFound {
@@ -307,7 +308,7 @@ func TestStorage_GetEvents(t *testing.T) {
 			Deleted:      false,
 			DateStarted:  time.Date(2020, time.January, 2, 10, 20, 12, 0, time.Local),
 			DateComplete: time.Date(2020, time.January, 2, 20, 20, 12, 0, time.Local)}}
-	events, err := storage.GetEvents()
+	events, err := storage.GetEvents(context.Background())
 	if err != nil {
 		t.Errorf("unexpected error: %s", err.Error())
 	}
@@ -322,7 +323,7 @@ func TestStorage_GetEvents(t *testing.T) {
 func TestStorage_GetEvents_Empty(t *testing.T) {
 	storage := New()
 
-	_, err := storage.GetEvents()
+	_, err := storage.GetEvents(context.Background())
 	if err == nil {
 		t.Errorf("expected error: %s, get nil", stor.ErrNotFound)
 	}

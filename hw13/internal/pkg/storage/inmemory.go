@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"context"
 	"time"
 
 	"github.com/google/uuid"
@@ -20,7 +21,7 @@ func New() *Storage {
 }
 
 // Add models to storage.
-func (storage *Storage) Add(event models.Event) (string, error) {
+func (storage *Storage) Add(event models.Event, _ context.Context) (string, error) {
 	for _, e := range storage.events {
 		if inTimeSpan(e.DateStarted, e.DateComplete, event.DateStarted) ||
 			inTimeSpan(e.DateStarted, e.DateComplete, event.DateComplete) ||
@@ -42,7 +43,7 @@ func (storage *Storage) Add(event models.Event) (string, error) {
 }
 
 // Edit models data in data storage
-func (storage *Storage) Edit(id string, event models.Event) error {
+func (storage *Storage) Edit(id string, event models.Event, _ context.Context) error {
 	e, ok := storage.events[id]
 	if !ok {
 		return stor.ErrNotFound
@@ -57,7 +58,7 @@ func (storage *Storage) Edit(id string, event models.Event) error {
 }
 
 // GetEvents return all events
-func (storage *Storage) GetEvents() ([]models.Event, error) {
+func (storage *Storage) GetEvents(_ context.Context) ([]models.Event, error) {
 	if len(storage.events) > 0 {
 		events := make([]models.Event, 0, len(storage.events))
 		for _, e := range storage.events {
@@ -73,7 +74,7 @@ func (storage *Storage) GetEvents() ([]models.Event, error) {
 }
 
 //GetEventByID return models with ID
-func (storage *Storage) GetEventByID(id string) ([]models.Event, error) {
+func (storage *Storage) GetEventByID(id string, _ context.Context) ([]models.Event, error) {
 	e, ok := storage.events[id]
 	if !ok {
 		return []models.Event{}, stor.ErrNotFound
@@ -84,7 +85,7 @@ func (storage *Storage) GetEventByID(id string) ([]models.Event, error) {
 }
 
 //Delete will mark models as deleted
-func (storage *Storage) Delete(id string) error {
+func (storage *Storage) Delete(id string, _ context.Context) error {
 	e, ok := storage.events[id]
 	if !ok {
 		return stor.ErrNotFound

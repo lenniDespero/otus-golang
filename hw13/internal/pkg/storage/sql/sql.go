@@ -20,11 +20,13 @@ import (
 // Storage struct
 type Storage struct {
 	ConnPool *pgxpool.Pool
+	ctx      context.Context
 }
 
 //New returns new storage
 func New(dbconf *config.DBConfig) (*Storage, error) {
 	storage := &Storage{}
+	storage.ctx = context.Background()
 	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", dbconf.User, dbconf.Password, dbconf.Host, dbconf.Port, dbconf.Database)
 	cfg, err := pgxpool.ParseConfig(dsn)
 	if err != nil {
@@ -37,7 +39,7 @@ func New(dbconf *config.DBConfig) (*Storage, error) {
 		Timeout:   1 * time.Second,
 	}).DialContext
 
-	pool, err := pgxpool.ConnectConfig(context.Background(), cfg)
+	pool, err := pgxpool.ConnectConfig(storage.ctx, cfg)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to connect to postgres")
 	}
@@ -45,12 +47,11 @@ func New(dbconf *config.DBConfig) (*Storage, error) {
 	return storage, nil
 }
 
-func (s Storage) Add(event models.Event) (string, error) {
-	err := s.isInTime(event.DateStarted, event.DateComplete)
+func (s Storage) Add(event models.Event, ctx context.Context) (string, error) {
+	err := s.isInTime(event.DateStarted, event.DateComplete, ctx)
 	if err != nil {
 		return "", err
 	}
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 	sql := `INSERT INTO calendar.event (title,notice,date_start,date_complete,date_created) VALUES($1,$2,$3,$4,$5) RETURNING id;`
 	rows, err := s.ConnPool.Query(ctx, sql, event.Title, event.Notice, event.DateStarted, event.DateComplete, time.Now())
 	if err != nil {
@@ -74,8 +75,7 @@ func (s Storage) Add(event models.Event) (string, error) {
 
 }
 
-func (s Storage) Edit(id string, event models.Event) error {
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+func (s Storage) Edit(id string, event models.Event, ctx context.Context) error {
 	sql := `Update calendar.event 
 			SET id = $1,
 				title = $2,
@@ -99,8 +99,7 @@ func (s Storage) Edit(id string, event models.Event) error {
 	return nil
 }
 
-func (s Storage) GetEvents() ([]models.Event, error) {
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+func (s Storage) GetEvents(ctx context.Context) ([]models.Event, error) {
 	sql := "SELECT * FROM calendar.event WHERE deleted = $1;"
 	result, err := s.ConnPool.Query(ctx, sql, false)
 	if err != nil {
@@ -149,8 +148,7 @@ func (s Storage) GetEvents() ([]models.Event, error) {
 	return nil, types.ErrNotFound
 }
 
-func (s Storage) GetEventByID(id string) ([]models.Event, error) {
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+func (s Storage) GetEventByID(id string, ctx context.Context) ([]models.Event, error) {
 	sql := "SELECT * FROM calendar.event WHERE deleted = $1 and id = $2;"
 	result, err := s.ConnPool.Query(ctx, sql, false, id)
 	if err != nil {
@@ -199,8 +197,7 @@ func (s Storage) GetEventByID(id string) ([]models.Event, error) {
 	return nil, types.ErrNotFound
 }
 
-func (s Storage) Delete(id string) error {
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+func (s Storage) Delete(id string, ctx context.Context) error {
 	sql := `UPDATE calendar.event SET deleted = $1 where id = $2;`
 	_, err := s.ConnPool.Exec(ctx, sql, true, id)
 	if err != nil {
@@ -209,8 +206,7 @@ func (s Storage) Delete(id string) error {
 	return nil
 }
 
-func (s Storage) isInTime(dateStarted time.Time, dateComplete time.Time) error {
-	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+func (s Storage) isInTime(dateStarted time.Time, dateComplete time.Time, ctx context.Context) error {
 	sql := `
 		SELECT COUNT(*) from calendar.event where (
 			($1 between date_start and date_complete)

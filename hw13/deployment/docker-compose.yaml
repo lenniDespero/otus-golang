@@ -1,0 +1,21 @@
+version: "3.5"
+services:
+  database:
+    container_name: calendar-db
+    image: postgres:12.1
+    ports:
+      - "5435:5432"
+    restart: always
+    volumes:
+      - ./res/db:/docker-entrypoint-initdb.d:ro
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    env_file:
+      - ./.env
+    networks:
+      - otus-network
+networks:
+  otus-network:
+    name: otus-network

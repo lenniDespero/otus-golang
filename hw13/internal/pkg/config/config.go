@@ -9,6 +9,7 @@ import (
 type Config struct {
 	Log        Log        `json:"log"`
 	HttpListen HttpListen `json:"http_listen"`
+	DBConfig   DBConfig   `json:"db_config"`
 	GrpcServer GrpcServer `json:"grpc_server"`
 }
 
@@ -22,6 +23,13 @@ type HttpListen struct {
 	Port string `json:"port"`
 }
 
+type DBConfig struct {
+	User     string `json:"user"`
+	Password string `json:"password"`
+	Host     string `json:"host"`
+	Port     string `json:"port"`
+	Database string `json:"database"`
+  
 type GrpcServer struct {
 	Host string `json:"ip"`
 	Port string `json:"port"`
@@ -34,5 +42,8 @@ func GetConfigFromFile(filePath string) *Config {
 	}
 	return &Config{Log: Log{LogFile: viper.GetString("log.log_file"), LogLevel: viper.GetString("log.log_level")},
 		HttpListen: HttpListen{Ip: viper.GetString("http_listen.ip"), Port: viper.GetString("http_listen.port")},
-		GrpcServer: GrpcServer{Host: viper.GetString("grpc.host"), Port: viper.GetString("grpc.port")}}
+		DBConfig: DBConfig{User: viper.GetString("db.user"), Password: viper.GetString("db.password"),
+			Host: viper.GetString("db.host"), Port: viper.GetString("db.port"), Database: viper.GetString("db.database")},
+		GrpcServer: GrpcServer{Host: viper.GetString("grpc.host"), Port: viper.GetString("grpc.port")}
+	}
 }

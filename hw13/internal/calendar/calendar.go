@@ -1,6 +1,7 @@
 package calendar
 
 import (
+	"context"
 	"time"
 
 	"github.com/lenniDespero/otus-golang/hw13/internal/pkg/models"
@@ -30,27 +31,27 @@ func (c Calendar) Add(title string, dateStarted time.Time, dateComplete time.Tim
 		Notice:       notice,
 		Deleted:      false,
 	}
-	return c.storage.Add(event)
+	return c.storage.Add(event, context.Background())
 }
 
 //Edit event data in calendar
 func (c Calendar) Edit(id string, event models.Event, userId int64) error {
 	event.EditorID = userId
 	event.DateEdited = time.Now()
-	return c.storage.Edit(id, event)
+	return c.storage.Edit(id, event, context.Background())
 }
 
 //GetEvents return all events
 func (c Calendar) GetEvents() ([]models.Event, error) {
-	return c.storage.GetEvents()
+	return c.storage.GetEvents(context.Background())
 }
 
 //GetEventByID return event with ID
 func (c Calendar) GetEventByID(id string) ([]models.Event, error) {
-	return c.storage.GetEventByID(id)
+	return c.storage.GetEventByID(id, context.Background())
 }
 
 //Delete will mark event as deleted
 func (c Calendar) Delete(id string) error {
-	return c.storage.Delete(id)
+	return c.storage.Delete(id, context.Background())
 }

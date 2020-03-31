@@ -16,6 +16,21 @@ services:
       - ./.env
     networks:
       - otus-network
+  rabbit:
+
+    container_name: calendar-rabbit
+    image: rabbitmq:3.8-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBIT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBIT_PASS}
+    env_file:
+      - ./.env
+    networks:
+      - otus-network
 networks:
   otus-network:
     name: otus-network

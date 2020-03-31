@@ -22,4 +22,7 @@ type StorageInterface interface {
 
 	//Delete will mark models as deleted
 	Delete(id string, ctx context.Context) error
+
+	//GetEventsByStartPeriod return events where date start between NOW+timeBefore and NOW+timeBefore+timeLength
+	GetEventsByStartPeriod(timeBefore string, timeLength string, ctx context.Context) ([]models.Event, error)
 }

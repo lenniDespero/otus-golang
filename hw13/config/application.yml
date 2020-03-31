@@ -13,3 +13,12 @@ db:
   host: localhost
   port: 5435
   database: calendar
+ampq:
+  host: "127.0.0.1"
+  port: 5672
+  user: root
+  password: password
+scheduler:
+  period: 60
+  before_time: 60
+  event_time: 60

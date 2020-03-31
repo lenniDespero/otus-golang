@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -95,6 +96,27 @@ func (storage *Storage) Delete(id string, _ context.Context) error {
 	e.Deleted = true
 	storage.events[id] = e
 	return nil
+}
+
+func (storage *Storage) GetEventsByStartPeriod(timeBefore string, timeLength string, ctx context.Context) ([]models.Event, error) {
+	timeBeforeInt, err := strconv.Atoi(timeBefore)
+	if err != nil {
+		return nil, err
+	}
+	timeLengthInt, err := strconv.Atoi(timeLength)
+	if err != nil {
+		return nil, err
+	}
+	now := time.Now()
+	dateBefore := now.Local().Add(time.Minute * time.Duration(timeBeforeInt))
+	dateAfter := now.Local().Add(time.Minute * time.Duration(timeBeforeInt+timeLengthInt))
+	events := make([]models.Event, 0, len(storage.events))
+	for _, e := range storage.events {
+		if inTimeSpan(dateBefore, dateAfter, e.DateStarted) {
+			events = append(events, e)
+		}
+	}
+	return events, nil
 }
 
 func inTimeSpan(start, end, check time.Time) bool {

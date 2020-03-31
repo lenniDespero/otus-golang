@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"strconv"
 	"time"
 
 	"github.com/lenniDespero/otus-golang/hw13/internal/pkg/types"
@@ -204,6 +205,64 @@ func (s Storage) Delete(id string, ctx context.Context) error {
 		return err
 	}
 	return nil
+}
+
+func (s Storage) GetEventsByStartPeriod(timeBefore string, timeLength string, ctx context.Context) ([]models.Event, error) {
+	timeBeforeInt, err := strconv.Atoi(timeBefore)
+	if err != nil {
+		return nil, err
+	}
+	timeLengthInt, err := strconv.Atoi(timeLength)
+	if err != nil {
+		return nil, err
+	}
+	now := time.Now()
+	dateBefore := now.Local().Add(time.Minute * time.Duration(timeBeforeInt))
+	dateAfter := now.Local().Add(time.Minute * time.Duration(timeBeforeInt+timeLengthInt))
+	sql := `
+		SELECT * FROM calendar.event WHERE deleted = $1
+		AND date_start between $2 and $3;`
+	rows, err := s.ConnPool.Query(ctx, sql, false, dateBefore, dateAfter)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	events := make([]models.Event, 0)
+	for rows.Next() {
+		var id, title, notice sql2.NullString
+		var dateStart, dateComplete, dateEdited, dateCreated sql2.NullTime
+		var deleted bool
+		var creatorId, editorId sql2.NullInt64
+		if err := rows.Scan(&id, &title, &notice, &deleted, &dateStart, &dateComplete, &creatorId, &editorId, &dateCreated, &dateEdited); err != nil {
+			return nil, errors.Wrap(err, "failed to scan result into vars")
+		}
+		ev := models.Event{
+			ID:           id.String,
+			Title:        title.String,
+			Notice:       notice.String,
+			Deleted:      deleted,
+			DateStarted:  dateStart.Time,
+			DateComplete: dateComplete.Time,
+		}
+		if dateCreated.Valid {
+			ev.DateCreated = dateCreated.Time
+		}
+		if dateEdited.Valid {
+			ev.DateEdited = dateEdited.Time
+		}
+		if editorId.Valid {
+			ev.EditorID = editorId.Int64
+		}
+		if creatorId.Valid {
+			ev.CreatorID = creatorId.Int64
+		}
+		events = append(events, ev)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, errors.Wrap(err, "failed to load result")
+	}
+	return events, nil
+
 }
 
 func (s Storage) isInTime(dateStarted time.Time, dateComplete time.Time, ctx context.Context) error {

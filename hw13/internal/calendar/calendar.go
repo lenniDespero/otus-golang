@@ -20,7 +20,6 @@ func New(storage types.StorageInterface) *Calendar {
 // Add event to calendar.
 func (c Calendar) Add(title string, dateStarted time.Time, dateComplete time.Time, notice string, userId int64) (string, error) {
 	event := models.Event{
-		ID:           "",
 		Title:        title,
 		DateEdited:   time.Now(),
 		EditorID:     userId,
@@ -54,4 +53,8 @@ func (c Calendar) GetEventByID(id string) ([]models.Event, error) {
 //Delete will mark event as deleted
 func (c Calendar) Delete(id string) error {
 	return c.storage.Delete(id, context.Background())
+}
+
+func (c Calendar) GetEventsByStartPeriod(timeBefore string, timeLength string) ([]models.Event, error) {
+	return c.storage.GetEventsByStartPeriod(timeBefore, timeLength, context.Background())
 }

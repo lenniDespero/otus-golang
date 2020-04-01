@@ -70,10 +70,11 @@ GRPC сервис
 Пример разбиения сервисов  
 - API
 - Рассыльщик
-- Планировщик
+- Планировщик  
 
 Каждый из сервисов должен принимать путь файлу конфигурации:  
-
 ./calendar_api --config=/path/to/config.yaml  
 ./calendar_scheduler --config=/path/to/config.yaml  
 ./calendar_sender --config=/path/to/config.yaml  
+Запуск БД и Rabbit: `docker-compose up`  
+Сборка: `make build`  

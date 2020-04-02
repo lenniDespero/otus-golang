@@ -5,16 +5,16 @@ grpc:
   host: "localhost"
   port: 5001
 log:
-  log_file: ../cmd/application.log
+  log_file: application.log
   log_level: debug
 db:
   user: root
   password: password
-  host: localhost
-  port: 5435
+  host: "calendar-db"
+  port: 5432
   database: calendar
 ampq:
-  host: "127.0.0.1"
+  host: "calendar-rabbit"
   port: 5672
   user: root
   password: password

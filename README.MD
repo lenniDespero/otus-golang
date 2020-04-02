@@ -13,6 +13,7 @@
 * [hw-21](#hw-21)
 * [hw-22](#hw-22)
 * [hw-25](#hw-25)
+* [hw-28](#hw-28)
 
 ## [hw-1](#hw-1)
 Hello now()  
@@ -217,4 +218,15 @@ GRPC сервис
 
 ./calendar_api --config=/path/to/config.yaml  
 ./calendar_scheduler --config=/path/to/config.yaml  
-./calendar_sender --config=/path/to/config.yaml  
+./calendar_sender --config=/path/to/config.yaml
+
+## [hw-28](#hw-28)
+(Folder: `hw13`)  
+Докеризация сервиса  
+Цель: Цель домашнего задания: запустить все компоненты проекта в Docker Отрабатываются навыки работы с Docker и docker-compose  
+Создать Dockerfile для каждого из микросервисов (api, scheduler, sender)  
+Собрать образы и проверить их локальный запуск  
+Создать docker-compose файл, который запускает PostgreSQL, RabbitMQ и все микросервисы вместе.  
+Для PostgreSQL и RabbitMQ использовать официальные образы из dockerhub.  
+Так же в docker-compose должен запускаться one-shot скрипт который применяет SQL миграции, создавая структуру СУБД.  
+Для контейнера с API необходимо пробросить (expose) порт 8888 на хост-машину.     

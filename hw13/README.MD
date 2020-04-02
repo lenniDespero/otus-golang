@@ -77,4 +77,15 @@ GRPC сервис
 ./calendar_scheduler --config=/path/to/config.yaml  
 ./calendar_sender --config=/path/to/config.yaml  
 Запуск БД и Rabbit: `docker-compose up`  
-Сборка: `make build`  
+Сборка: `make build` 
+
+## Part 7
+Докеризация сервиса  
+Цель: Цель домашнего задания: запустить все компоненты проекта в Docker Отрабатываются навыки работы с Docker и docker-compose  
+Создать Dockerfile для каждого из микросервисов (api, scheduler, sender)  
+Собрать образы и проверить их локальный запуск  
+Создать docker-compose файл, который запускает PostgreSQL, RabbitMQ и все микросервисы вместе.  
+Для PostgreSQL и RabbitMQ использовать официальные образы из dockerhub.  
+Так же в docker-compose должен запускаться one-shot скрипт который применяет SQL миграции, создавая структуру СУБД.  
+Для контейнера с API необходимо пробросить (expose) порт 8888 на хост-машину.   
+Запуск: `cd deployment && docker-compose up`  

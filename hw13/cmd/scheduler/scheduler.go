@@ -30,8 +30,10 @@ func (s *scheduler) Start(conf config.Scheduler) {
 		logger.Fatal(err.Error())
 	}
 	logger.Debug(fmt.Sprintf("Set ticker on minutes : %d", period))
-
-	for ; true; <-time.Tick(time.Duration(period) * time.Minute) {
+	ticker := time.NewTicker(time.Duration(period) * time.Minute)
+	logger.Debug(fmt.Sprintf("Started at : %v", time.Now()))
+	defer ticker.Stop()
+	for ; true; <-ticker.C {
 		logger.Debug("Get current events")
 		events, err := s.calendar.GetEventsByStartPeriod(conf.BeforeTime, conf.EventTime)
 		if err != nil {

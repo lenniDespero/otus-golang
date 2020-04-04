@@ -34,8 +34,6 @@ services:
     build:
       context: ..
       dockerfile: ./deployment/api/Dockerfile
-    volumes:
-      - ./config:/config
     ports:
       - 8888:2000
     networks:
@@ -43,6 +41,7 @@ services:
     depends_on:
       - database
     restart: on-failure
+#    tty: true
   notifier:
     build:
       context: ..

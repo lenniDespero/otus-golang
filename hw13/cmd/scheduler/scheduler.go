@@ -55,14 +55,6 @@ func (s *scheduler) Start(conf config.Scheduler) {
 }
 
 func main() {
-	ticker := time.NewTicker(3 * time.Second)
-	fmt.Println("Started at", time.Now())
-	defer ticker.Stop()
-	go func() {
-		for ; true; <-ticker.C {
-			fmt.Println("Tick at", time.Now())
-		}
-	}()
 	var configPath = flag.String("config", "../config/application.yml", "path to configuration flag")
 	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
 	flag.Parse()

@@ -30,8 +30,10 @@ func (s *scheduler) Start(conf config.Scheduler) {
 		logger.Fatal(err.Error())
 	}
 	logger.Debug(fmt.Sprintf("Set ticker on minutes : %d", period))
-
-	for ; true; <-time.Tick(time.Duration(period) * time.Minute) {
+	ticker := time.NewTicker(time.Duration(period) * time.Minute)
+	logger.Debug(fmt.Sprintf("Started at : %v", time.Now()))
+	defer ticker.Stop()
+	for ; true; <-ticker.C {
 		logger.Debug("Get current events")
 		events, err := s.calendar.GetEventsByStartPeriod(conf.BeforeTime, conf.EventTime)
 		if err != nil {
@@ -53,6 +55,14 @@ func (s *scheduler) Start(conf config.Scheduler) {
 }
 
 func main() {
+	ticker := time.NewTicker(3 * time.Second)
+	fmt.Println("Started at", time.Now())
+	defer ticker.Stop()
+	go func() {
+		for ; true; <-ticker.C {
+			fmt.Println("Tick at", time.Now())
+		}
+	}()
 	var configPath = flag.String("config", "../config/application.yml", "path to configuration flag")
 	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
 	flag.Parse()

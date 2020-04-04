@@ -1,14 +1,15 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/lenniDespero/otus-golang/hw13/internal/calendar"
 	amqpClient "github.com/lenniDespero/otus-golang/hw13/internal/pkg/ampq"
 	"github.com/lenniDespero/otus-golang/hw13/internal/pkg/config"
 	"github.com/lenniDespero/otus-golang/hw13/internal/pkg/logger"
 	"github.com/lenniDespero/otus-golang/hw13/internal/pkg/storage/sql"
+	"github.com/lenniDespero/otus-golang/hw13/internal/pkg/types"
 	"github.com/spf13/pflag"
 	"log"
 	"strconv"
@@ -16,12 +17,13 @@ import (
 )
 
 type scheduler struct {
-	calendar calendar.CalendarInterface
-	ampq     *amqpClient.Ampq
+	storage types.LimitedStorageInterface
+	ampq    *amqpClient.Ampq
+	ctx     context.Context
 }
 
-func newScheduler(calendar calendar.CalendarInterface, ampq *amqpClient.Ampq) *scheduler {
-	return &scheduler{calendar, ampq}
+func newScheduler(storage types.LimitedStorageInterface, ampq *amqpClient.Ampq, ctx context.Context) *scheduler {
+	return &scheduler{storage, ampq, ctx}
 }
 
 func (s *scheduler) Start(conf config.Scheduler) {
@@ -35,7 +37,7 @@ func (s *scheduler) Start(conf config.Scheduler) {
 	defer ticker.Stop()
 	for ; true; <-ticker.C {
 		logger.Debug("Get current events")
-		events, err := s.calendar.GetEventsByStartPeriod(conf.BeforeTime, conf.EventTime)
+		events, err := s.storage.GetEventsByStartPeriod(conf.BeforeTime, conf.EventTime, s.ctx)
 		if err != nil {
 			logger.Fatal(err.Error())
 		}
@@ -64,12 +66,11 @@ func main() {
 	if err != nil {
 		logger.Fatal(err.Error())
 	}
-	calendar := calendar.New(storage)
 	amqpBus, err := amqpClient.NewAmpq(&conf.Ampq)
 	if err != nil {
 		logger.Fatal(err.Error())
 	}
-	scheduler := newScheduler(calendar, amqpBus)
+	scheduler := newScheduler(storage, amqpBus, context.Background())
 	if err != nil {
 		log.Fatalf("Scheduler init error: %s", err)
 	}

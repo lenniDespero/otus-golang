@@ -26,3 +26,8 @@ type StorageInterface interface {
 	//GetEventsByStartPeriod return events where date start between NOW+timeBefore and NOW+timeBefore+timeLength
 	GetEventsByStartPeriod(timeBefore string, timeLength string, ctx context.Context) ([]models.Event, error)
 }
+
+type LimitedStorageInterface interface {
+	//GetEventsByStartPeriod return events where date start between NOW+timeBefore and NOW+timeBefore+timeLength
+	GetEventsByStartPeriod(timeBefore string, timeLength string, ctx context.Context) ([]models.Event, error)
+}

@@ -35,23 +35,33 @@ func (s *scheduler) Start(conf config.Scheduler) {
 	ticker := time.NewTicker(time.Duration(period) * time.Minute)
 	logger.Debug(fmt.Sprintf("Started at : %v", time.Now()))
 	defer ticker.Stop()
+	localCtx, cancel := context.WithCancel(s.ctx)
 	for ; true; <-ticker.C {
-		logger.Debug("Get current events")
-		events, err := s.storage.GetEventsByStartPeriod(conf.BeforeTime, conf.EventTime, s.ctx)
-		if err != nil {
-			logger.Fatal(err.Error())
-		}
-		for _, event := range events {
-			msg, err := json.Marshal(event)
+		select {
+		case <-localCtx.Done():
+			return
+		default:
+			logger.Debug("Get current events")
+			events, err := s.storage.GetEventsByStartPeriod(conf.BeforeTime, conf.EventTime, s.ctx)
 			if err != nil {
-				logger.Fatal(fmt.Sprintf("Failed to encode event: %s", err.Error()))
-				continue
+				logger.Fatal(err.Error())
+				cancel()
 			}
-			if err := s.ampq.Publish(msg); err != nil {
-				logger.Fatal(fmt.Sprintf("Failed to publish event: %s", err.Error()))
-				continue
+			for _, event := range events {
+				msg, err := json.Marshal(event)
+				if err != nil {
+					logger.Fatal(fmt.Sprintf("Failed to encode event: %s", err.Error()))
+					cancel()
+					continue
+				}
+				if err := s.ampq.Publish(msg); err != nil {
+					logger.Fatal(fmt.Sprintf("Failed to publish event: %s", err.Error()))
+					cancel()
+					continue
+				}
+				logger.Debug(fmt.Sprintf("message %s published", msg))
 			}
-			logger.Debug(fmt.Sprintf("message %s published", msg))
+			continue
 		}
 	}
 }

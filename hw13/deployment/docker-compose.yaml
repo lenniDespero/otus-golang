@@ -16,6 +16,51 @@ services:
       - ./.env
     networks:
       - otus-network
+  rabbit:
+    container_name: calendar-rabbit
+    image: rabbitmq:3.8-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBIT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBIT_PASS}
+    env_file:
+      - ./.env
+    networks:
+      - otus-network
+  api:
+    build:
+      context: ..
+      dockerfile: ./deployment/api/Dockerfile
+    ports:
+      - 8888:2000
+    networks:
+      - otus-network
+    depends_on:
+      - database
+    restart: on-failure
+#    tty: true
+  notifier:
+    build:
+      context: ..
+      dockerfile: ./deployment/notifier/Dockerfile
+    networks:
+      - otus-network
+    depends_on:
+      - rabbit
+    restart: on-failure
+  scheduler:
+    build:
+      context: ..
+      dockerfile: ./deployment/scheduler/Dockerfile
+    networks:
+      - otus-network
+    depends_on:
+      - rabbit
+      - database
+    restart: on-failure
 networks:
   otus-network:
     name: otus-network

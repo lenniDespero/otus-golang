@@ -1,3 +1,4 @@
+.PHONY: test
 PROJECTNAME="hw13"
 
 help: Makefile
@@ -21,3 +22,11 @@ build-notifier:
 ## build-scheduler: Build scheduler
 build-scheduler:
 		CGO_ENABLED=0 go build -o ./bin/scheduler ./cmd/scheduler/ ;
+
+## test: run integration tests
+test:
+	cd deployment ;\
+	test_status=0 ;\
+	docker-compose -f docker-compose.test.yaml up --build --exit-code-from tests --abort-on-container-exit|| test_status=$$? ;\
+	cd .. ;\
+	exit $$test_status ;\

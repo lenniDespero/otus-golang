@@ -13,6 +13,8 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o calendar_api cmd/api/api.go
 ## Get small image
 FROM alpine
 WORKDIR /opt/api
+RUN apk add --no-cache tzdata
+ENV TZ=Europe/Moscow
 ## Copy build from sourse
 COPY --from=builder /app/calendar_api .
 COPY --from=builder /app/config/application.yml .

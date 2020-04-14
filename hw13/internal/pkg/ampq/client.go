@@ -27,11 +27,10 @@ func NewAmpq(conf *config.Ampq) (*Ampq, error) {
 		return nil, errors.Wrap(err, "failed to prepare AMQP channel")
 	}
 
-	queue, err := channel.QueueDeclare("events_queue", true, false, false, false, nil)
+	queue, err := channel.QueueDeclare(conf.Queue, true, false, false, false, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to declare AMQP queue")
 	}
-	logger.Debug("Ampq connection complete")
 	return &Ampq{conn, channel, queue}, nil
 }
 
@@ -56,11 +55,9 @@ func (am *Ampq) Subscribe(consumerName string, handlerFunc func(amqp.Delivery)) 
 	if err != nil {
 		return errors.Wrap(err, "failed to init consumer")
 	}
-	logger.Debug("Consumer start")
 	waitingChan := make(chan struct{})
 	go func() {
 		for msg := range messages {
-			logger.Debug(fmt.Sprintf("Received a message: %s", msg.Body))
 			handlerFunc(msg)
 		}
 	}()

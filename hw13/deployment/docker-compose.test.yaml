@@ -45,6 +45,20 @@ services:
       - ./.test.env
     restart: on-failure
   #    tty: true
+  grpc:
+    build:
+      context: ..
+      dockerfile: ./deployment/grpc/Dockerfile
+    container_name: ${TEST_GRPC_NAME}
+    ports:
+      - 5001:5001
+    networks:
+      - otus-network-test
+    depends_on:
+      - database
+    env_file:
+      - ./.test.env
+    restart: on-failure
   notifier:
     build:
       context: ..

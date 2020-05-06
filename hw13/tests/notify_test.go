@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/cucumber/godog"
+	"github.com/cucumber/messages-go/v10"
 	amqpClient "github.com/lenniDespero/otus-golang/hw13/internal/pkg/ampq"
 	"github.com/lenniDespero/otus-golang/hw13/internal/pkg/config"
 	"github.com/lenniDespero/otus-golang/hw13/internal/pkg/models"
@@ -103,5 +104,7 @@ func FeatureContextNotice(s *godog.Suite) {
 	s.Step(`^I get events from queue$`, t.iGetEventsFromQueue)
 	s.Step(`^I have event in Events$`, t.iHaveEventInEvents)
 	s.Step(`^I has no errors$`, t.iHasNoErrors)
-	s.AfterSuite(t.stop)
+	s.AfterFeature(func(*messages.GherkinDocument) {
+		t.stop()
+	})
 }

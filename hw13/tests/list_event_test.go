@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/cucumber/godog"
+	"github.com/cucumber/messages-go/v10"
 	"github.com/lenniDespero/otus-golang/hw13/internal/pkg/models"
 	"net/http"
 	"net/url"
@@ -133,5 +134,7 @@ func FeatureContextListEvents(s *godog.Suite) {
 	s.Step(`^I send  request with type month$`, list.iSendRequestWithTypeMonth)
 	s.Step(`^I have not errors$`, list.iHaveNotErrors)
 	s.Step(`^I get Events with (\d+) events$`, list.iGetEventsWithEvents)
-	s.AfterSuite(list.clear)
+	s.AfterFeature(func(*messages.GherkinDocument) {
+		list.clear()
+	})
 }

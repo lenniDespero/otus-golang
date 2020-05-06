@@ -7,7 +7,7 @@ services:
       - "5435:5432"
     restart: always
     volumes:
-      - ./res/db:/docker-entrypoint-initdb.d:ro
+      - ../migrations:/docker-entrypoint-initdb.d:ro
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -45,6 +45,21 @@ services:
       - ./.env
     restart: on-failure
 #    tty: true
+  grpc:
+    build:
+      context: ..
+      dockerfile: ./deployment/grpc/Dockerfile
+    container_name: ${GRPC_NAME}
+    ports:
+      - 5001:5001
+    networks:
+      - otus-network
+    depends_on:
+      - database
+    env_file:
+      - ./.env
+    restart: on-failure
+#    tty: true
   notifier:
     build:
       context: ..
@@ -61,7 +76,7 @@ services:
     container_name: ${SCHEDULER_NAME}
     build:
       context: ..
-      dockerfile: ./deployment/scheduler/Dockerfilу
+      dockerfile: ./deployment/scheduler/Dockerfile
     networks:
       - otus-network
     env_file:

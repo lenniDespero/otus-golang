@@ -8,8 +8,7 @@ RUN go mod download
 ## Copy the source from the current directory to the Working Directory inside the container
 COPY . .
 ## Build the Go app
-#RUN go build -o calendar_scheduler cmd/scheduler/scheduler.go
-RUN CGO_ENABLED=0 GOOS=linux go build -o calendar_scheduler cmd/scheduler/scheduler.go
+RUN CGO_ENABLED=0 GOOS=linux go build -o calendar_grpc grpc/server/server.go
 
 ## Get small image
 FROM alpine
@@ -17,9 +16,9 @@ WORKDIR /opt/api
 RUN apk add --no-cache tzdata
 ENV TZ=Europe/Moscow
 ## Copy build from sourse
-COPY --from=builder /app/calendar_scheduler .
+COPY --from=builder /app/calendar_grpc .
 COPY --from=builder /app/config/application.yml .
-COPY --from=builder /app/wait .
-## Add the wait script to the image
-CMD ./wait && ./calendar_scheduler --config=application.yml
-#CMD ["./calendar_scheduler", "--config=application.yml"]
+# Expose port and run
+EXPOSE 5001
+CMD ["./calendar_grpc", "--config=application.yml"]
+

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/cucumber/godog"
+	"github.com/cucumber/messages-go/v10"
 	"github.com/lenniDespero/otus-golang/hw13/internal/pkg/models"
 	"net/http"
 	"net/url"
@@ -148,7 +149,10 @@ func FeatureContextHttpEvent(s *godog.Suite) {
 	s.Step(`^GetError has no errors$`, tStruct.getErrorHasNoErrors)
 	s.Step(`^I send Get request with non existing event id to API$`, tStruct.iSendGetRequestWithNonExistingEventIdToAPI)
 	s.Step(`^I get response with error code \'Event not found\'$`, tStruct.iGetResponseWithErrorCodeEventNotFound)
-	s.AfterSuite(tStruct.stop)
+
+	s.AfterFeature(func(*messages.GherkinDocument) {
+		tStruct.stop()
+	})
 }
 
 func (t testStruct) stop() {

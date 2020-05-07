@@ -206,20 +206,20 @@ func (s Server) edit(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		msg, _ := json.Marshal(MyError{http.StatusInternalServerError, err.Error()})
 		sendResponse(msg, http.StatusInternalServerError, w)
-		s.codes.WithLabelValues(strconv.Itoa(http.StatusInternalServerError), r.URL.Path).Inc()
+		s.codes.WithLabelValues(strconv.Itoa(http.StatusInternalServerError), "/edit/id").Inc()
 		return
 	}
 	data.DateComplete, err = time.Parse("2006-01-02 15:04:05", r.FormValue("dateComplete"))
 	if err != nil {
 		msg, _ := json.Marshal(MyError{http.StatusInternalServerError, err.Error()})
 		sendResponse(msg, http.StatusInternalServerError, w)
-		s.codes.WithLabelValues(strconv.Itoa(http.StatusInternalServerError), r.URL.Path).Inc()
+		s.codes.WithLabelValues(strconv.Itoa(http.StatusInternalServerError), "/edit/id").Inc()
 		return
 	}
 	if data.DateStarted.After(data.DateComplete) {
 		msg, _ := json.Marshal(MyError{http.StatusBadRequest, "Check dates date_complete before date_started"})
 		sendResponse(msg, http.StatusInternalServerError, w)
-		s.codes.WithLabelValues(strconv.Itoa(http.StatusInternalServerError), r.URL.Path).Inc()
+		s.codes.WithLabelValues(strconv.Itoa(http.StatusInternalServerError), "/edit/id").Inc()
 		return
 	}
 	ip := r.RemoteAddr
@@ -228,12 +228,12 @@ func (s Server) edit(w http.ResponseWriter, r *http.Request) {
 		if err == types.ErrDateBusy {
 			msg, _ := json.Marshal(MyError{http.StatusBadRequest, err.Error()})
 			sendResponse(msg, http.StatusBadRequest, w)
-			s.codes.WithLabelValues(strconv.Itoa(http.StatusBadRequest), r.URL.Path).Inc()
+			s.codes.WithLabelValues(strconv.Itoa(http.StatusBadRequest), "/edit/id").Inc()
 			return
 		} else {
 			msg, _ := json.Marshal(MyError{http.StatusInternalServerError, err.Error()})
 			sendResponse(msg, http.StatusInternalServerError, w)
-			s.codes.WithLabelValues(strconv.Itoa(http.StatusInternalServerError), r.URL.Path).Inc()
+			s.codes.WithLabelValues(strconv.Itoa(http.StatusInternalServerError), "/edit/id").Inc()
 			return
 		}
 	}
@@ -242,7 +242,7 @@ func (s Server) edit(w http.ResponseWriter, r *http.Request) {
 	sendResponse(msg, http.StatusOK, w)
 	dur := time.Since(startFunc)
 	s.stats.WithLabelValues(r.URL.Path).Observe(dur.Seconds())
-	s.codes.WithLabelValues(strconv.Itoa(http.StatusOK), r.URL.Path).Inc()
+	s.codes.WithLabelValues(strconv.Itoa(http.StatusOK), "/edit/id").Inc()
 }
 
 func (s Server) get(w http.ResponseWriter, r *http.Request) {
@@ -290,12 +290,12 @@ func (s Server) getById(w http.ResponseWriter, r *http.Request) {
 		if err == types.ErrNotFound {
 			msg, _ := json.Marshal(MyError{http.StatusNotFound, err.Error()})
 			sendResponse(msg, http.StatusNotFound, w)
-			s.codes.WithLabelValues(strconv.Itoa(http.StatusNotFound), r.URL.Path).Inc()
+			s.codes.WithLabelValues(strconv.Itoa(http.StatusNotFound), "/get/id").Inc()
 			return
 		} else {
 			msg, _ := json.Marshal(MyError{http.StatusInternalServerError, err.Error()})
 			sendResponse(msg, http.StatusInternalServerError, w)
-			s.codes.WithLabelValues(strconv.Itoa(http.StatusInternalServerError), r.URL.Path).Inc()
+			s.codes.WithLabelValues(strconv.Itoa(http.StatusInternalServerError), "/get/id").Inc()
 			return
 		}
 	}
@@ -303,13 +303,13 @@ func (s Server) getById(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		msg, _ := json.Marshal(MyError{http.StatusInternalServerError, err.Error()})
 		sendResponse(msg, http.StatusInternalServerError, w)
-		s.codes.WithLabelValues(strconv.Itoa(http.StatusInternalServerError), r.URL.Path).Inc()
+		s.codes.WithLabelValues(strconv.Itoa(http.StatusInternalServerError), "/get/id").Inc()
 		return
 	}
 	sendResponse(ev, http.StatusOK, w)
 	dur := time.Since(startFunc)
 	s.stats.WithLabelValues(r.URL.Path).Observe(dur.Seconds())
-	s.codes.WithLabelValues(strconv.Itoa(http.StatusOK), r.URL.Path).Inc()
+	s.codes.WithLabelValues(strconv.Itoa(http.StatusOK), "/get/id").Inc()
 }
 
 func (s Server) delete(w http.ResponseWriter, r *http.Request) {
@@ -323,12 +323,12 @@ func (s Server) delete(w http.ResponseWriter, r *http.Request) {
 		if err == types.ErrNotFound {
 			msg, _ := json.Marshal(MyError{http.StatusNotFound, err.Error()})
 			sendResponse(msg, http.StatusNotFound, w)
-			s.codes.WithLabelValues(strconv.Itoa(http.StatusNotFound), r.URL.Path).Inc()
+			s.codes.WithLabelValues(strconv.Itoa(http.StatusNotFound), "/delete/id").Inc()
 			return
 		} else {
 			msg, _ := json.Marshal(MyError{http.StatusInternalServerError, err.Error()})
 			sendResponse(msg, http.StatusInternalServerError, w)
-			s.codes.WithLabelValues(strconv.Itoa(http.StatusInternalServerError), r.URL.Path).Inc()
+			s.codes.WithLabelValues(strconv.Itoa(http.StatusInternalServerError), "/delete/id").Inc()
 			return
 		}
 	}
@@ -337,7 +337,7 @@ func (s Server) delete(w http.ResponseWriter, r *http.Request) {
 	sendResponse(msg, http.StatusOK, w)
 	dur := time.Since(startFunc)
 	s.stats.WithLabelValues(r.URL.Path).Observe(dur.Seconds())
-	s.codes.WithLabelValues(strconv.Itoa(http.StatusOK), r.URL.Path).Inc()
+	s.codes.WithLabelValues(strconv.Itoa(http.StatusOK), "/delete/id").Inc()
 }
 
 func (s Server) events(w http.ResponseWriter, r *http.Request) {

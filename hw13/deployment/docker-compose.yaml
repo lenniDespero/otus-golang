@@ -119,7 +119,24 @@ services:
       PG_EXPORTER_EXTEND_QUERY_PATH: "/queries.yaml"
     networks:
       - otus-network
-
+  grafana:
+    image: grafana/grafana:latest-ubuntu
+    container_name: grafana
+    volumes:
+      - ./grafana/datasources:/etc/grafana/datasources
+      - ./grafana/dashboards:/etc/grafana/dashboards
+      - ./grafana/setup.sh:/setup.sh
+    entrypoint: /setup.sh
+    user: root
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    restart: on-failure
+    ports:
+      - 3000:3000
+    networks:
+      - otus-network
 networks:
   otus-network:
     name: otus-network

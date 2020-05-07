@@ -20,4 +20,5 @@ COPY --from=builder /app/calendar_api .
 COPY --from=builder /app/config/application.yml .
 # Expose port and run
 EXPOSE 2000
+EXPOSE 2114
 CMD ["./calendar_api", "--config=application.yml"]

@@ -21,5 +21,6 @@ COPY --from=builder /app/calendar_notifier .
 COPY --from=builder /app/config/application.yml .
 COPY --from=builder /app/wait .
 ## Add the wait script to the image
+EXPOSE 2114
 CMD ./wait && ./calendar_notifier --config=application.yml
 #CMD ["./wait && ./calendar_notifier", "--config=application.yml"]

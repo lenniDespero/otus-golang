@@ -20,5 +20,6 @@ COPY --from=builder /app/calendar_grpc .
 COPY --from=builder /app/config/application.yml .
 # Expose port and run
 EXPOSE 5001
+EXPOSE 2112
 CMD ["./calendar_grpc", "--config=application.yml"]
 

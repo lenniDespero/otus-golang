@@ -6,6 +6,7 @@ replace github.com/lenniDespero/otus-golang/hw13 => ./
 
 require (
 	github.com/coreos/go-systemd v0.0.0-20190719114852-fd7a80b32e1f // indirect
+	github.com/cucumber/godog v0.9.0
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/golang/protobuf v1.3.5
 	github.com/google/uuid v1.1.1

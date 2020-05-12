@@ -78,6 +78,7 @@ func InitServer(listenIp string, listenPort string, calendar calendar.CalendarIn
 	router.HandleFunc("/get/{id}", server.getById).Methods("GET")
 	router.HandleFunc("/delete/{id}", server.delete).Methods("POST")
 	router.HandleFunc("/events", server.events).Queries("time_before", "{time_before}", "time_length", "{time_length}").Methods("GET")
+	router.HandleFunc("/events/{type}", server.eventsPlan).Methods("GET")
 
 	srv := &http.Server{
 		Addr:         listenIp + ":" + listenPort,
@@ -289,6 +290,50 @@ func (s Server) events(w http.ResponseWriter, r *http.Request) {
 	timeLength := v.Get("time_length")
 	if timeBefore == "" || timeLength == "" {
 		msg, _ := json.Marshal(MyError{http.StatusBadRequest, "Query parameters time_before and time_length required"})
+		sendResponse(msg, http.StatusBadRequest, w)
+		return
+	}
+	events, err := s.calendar.GetEventsByStartPeriod(timeBefore, timeLength)
+	if err != nil {
+		if err == types.ErrNotFound {
+			msg, _ := json.Marshal(MyError{http.StatusNotFound, err.Error()})
+			sendResponse(msg, http.StatusNotFound, w)
+			return
+		} else {
+			msg, _ := json.Marshal(MyError{http.StatusInternalServerError, err.Error()})
+			sendResponse(msg, http.StatusInternalServerError, w)
+			return
+		}
+	}
+	ev, err := json.Marshal(events)
+	if err != nil {
+		msg, _ := json.Marshal(MyError{http.StatusInternalServerError, err.Error()})
+		sendResponse(msg, http.StatusInternalServerError, w)
+		return
+	}
+	sendResponse(ev, http.StatusOK, w)
+}
+
+func (s Server) eventsPlan(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	logger.Info("Incoming message events",
+		"host", r.Host,
+		"url", r.URL.Path)
+	timeBefore := "0"
+	timeLength := ""
+	vars := mux.Vars(r)
+	now := time.Now()
+	if vars["type"] == "day" {
+		endDay := time.Until(now.Add(time.Duration(24) * time.Hour))
+		timeLength = strconv.FormatInt(int64(endDay.Round(time.Minute).Minutes()), 10)
+	} else if vars["type"] == "week" {
+		endDay := time.Until(now.Add(time.Duration(24) * time.Hour * 7))
+		timeLength = strconv.FormatInt(int64(endDay.Round(time.Minute).Minutes()), 10)
+	} else if vars["type"] == "month" {
+		endDay := time.Until(now.Add(time.Duration(24) * time.Hour * 30))
+		timeLength = strconv.FormatInt(int64(endDay.Round(time.Minute).Minutes()), 10)
+	} else {
+		msg, _ := json.Marshal(MyError{http.StatusBadRequest, "Type must be day | week| month"})
 		sendResponse(msg, http.StatusBadRequest, w)
 		return
 	}

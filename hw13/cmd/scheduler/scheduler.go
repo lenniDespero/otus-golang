@@ -31,8 +31,8 @@ func (s *scheduler) Start(conf config.Scheduler) {
 	if err != nil {
 		logger.Fatal(err.Error())
 	}
-	logger.Debug(fmt.Sprintf("Set ticker on minutes : %d", period))
-	ticker := time.NewTicker(time.Duration(period) * time.Minute)
+	logger.Debug(fmt.Sprintf("Set ticker on seconds : %d", period))
+	ticker := time.NewTicker(time.Duration(period) * time.Second)
 	logger.Debug(fmt.Sprintf("Started at : %v", time.Now()))
 	defer ticker.Stop()
 	localCtx, cancel := context.WithCancel(s.ctx)
@@ -42,6 +42,7 @@ func (s *scheduler) Start(conf config.Scheduler) {
 			return
 		default:
 			logger.Debug("Get current events")
+
 			events, err := s.storage.GetEventsByStartPeriod(conf.BeforeTime, conf.EventTime, s.ctx)
 			if err != nil {
 				logger.Fatal(err.Error())

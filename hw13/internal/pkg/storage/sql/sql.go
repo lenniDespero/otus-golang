@@ -289,3 +289,12 @@ func (s Storage) isInTime(dateStarted time.Time, dateComplete time.Time, ctx con
 	}
 	return nil
 }
+
+func (s Storage) ClearDB() error {
+	sql := `delete from calendar.event;`
+	_, err := s.ConnPool.Exec(s.ctx, sql)
+	if err != nil {
+		return err
+	}
+	return nil
+}

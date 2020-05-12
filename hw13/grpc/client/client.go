@@ -5,7 +5,7 @@ import (
 	"flag"
 	"time"
 
-	"github.com/lenniDespero/otus-golang/hw13/internal/pkg"
+	pkg "github.com/lenniDespero/otus-golang/hw13/internal/pkg"
 
 	"github.com/lenniDespero/otus-golang/hw13/internal/pkg/config"
 	"github.com/lenniDespero/otus-golang/hw13/internal/pkg/logger"

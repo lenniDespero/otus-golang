@@ -8,18 +8,23 @@ import (
 	"github.com/lenniDespero/otus-golang/hw13/internal/pkg/config"
 	"github.com/lenniDespero/otus-golang/hw13/internal/pkg/logger"
 	"github.com/lenniDespero/otus-golang/hw13/internal/pkg/models"
+	"github.com/lenniDespero/otus-golang/hw13/internal/pkg/monitor"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/pflag"
 	"github.com/streadway/amqp"
 	"log"
+	"net/http"
 )
 
 type notifier struct {
 	ampq       *amqpClient.Ampq
 	noticeAmpq *amqpClient.Ampq
+	stat       *prometheus.CounterVec
 }
 
 func newNotifier(ampq *amqpClient.Ampq, notice *amqpClient.Ampq) *notifier {
-	return &notifier{ampq, notice}
+	return &notifier{ampq, notice, monitor.NewCounterVec("calendar_notifier", "sender", "Sending notice")}
 }
 
 func (n *notifier) Start() error {
@@ -47,6 +52,7 @@ func (n *notifier) notify(event *models.Event) {
 		logger.Fatal(fmt.Sprintf("Failed to publish event: %s", err.Error()))
 	}
 	logger.Debug(fmt.Sprintf("message %s published to notice", msg))
+	n.stat.WithLabelValues("count").Inc()
 }
 
 func main() {
@@ -70,6 +76,16 @@ func main() {
 	if err != nil {
 		logger.Fatal(err.Error())
 	}
+
+	httpServer := &http.Server{
+		Handler: promhttp.HandlerFor(prometheus.DefaultGatherer, promhttp.HandlerOpts{}),
+		Addr:    fmt.Sprintf("0.0.0.0:%d", 2114),
+	}
+	go func() {
+		if err := httpServer.ListenAndServe(); err != nil {
+			logger.Fatal("Unable to start a http server", "error", err)
+		}
+	}()
 	notifierAgent := newNotifier(amqpBus, noticeBus)
 	if err != nil {
 		log.Fatalf(fmt.Sprintf("Scheduler init error: %s", err.Error()))

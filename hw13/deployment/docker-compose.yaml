@@ -71,6 +71,11 @@ services:
       - rabbit
     env_file:
       - ./.env
+    environment:
+      WAIT_HOSTS: ${DB_HOST}:5432, ${AMPQ_HOST}:5672
+      WAIT_HOSTS_TIMEOUT: 60
+      WAIT_BEFORE_HOSTS: 10
+      WAIT_SLEEP_INTERVAL: 5
     restart: on-failure
   scheduler:
     container_name: ${SCHEDULER_NAME}
@@ -81,10 +86,57 @@ services:
       - otus-network
     env_file:
       - ./.env
+    environment:
+      WAIT_HOSTS: ${DB_HOST}:5432, ${AMPQ_HOST}:5672
+      WAIT_HOSTS_TIMEOUT: 60
+      WAIT_BEFORE_HOSTS: 10
+      WAIT_SLEEP_INTERVAL: 5
     depends_on:
       - rabbit
       - database
     restart: on-failure
+
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    restart: on-failure
+    ports:
+      - "9090:9090"
+    networks:
+      - otus-network
+  pgexporter:
+    image: wrouesnel/postgres_exporter:latest
+    restart: on-failure
+    ports:
+      - "9187:9187"
+    volumes:
+      - ./exporter/queries.yaml:/queries.yaml
+    environment:
+      DATA_SOURCE_NAME: "postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:5432/calendar?sslmode=disable"
+      PG_EXPORTER_EXTEND_QUERY_PATH: "/queries.yaml"
+    networks:
+      - otus-network
+  grafana:
+    image: grafana/grafana:latest-ubuntu
+    container_name: grafana
+    volumes:
+      - ./grafana/datasources:/etc/grafana/datasources
+      - ./grafana/dashboards:/etc/grafana/dashboards
+      - ./grafana/setup.sh:/setup.sh
+    entrypoint: /setup.sh
+    user: root
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    restart: on-failure
+    ports:
+      - 3000:3000
+    networks:
+      - otus-network
 networks:
   otus-network:
     name: otus-network
